@@ -1,31 +1,14 @@
 import time
+from gpio_setup_lgpio import chip_handle, LABELING_START_PIN, LABELING_STOP_PIN, FILLING_STOP_PIN, BLOWING_START_PIN, BLOWING_STOP_PIN
 
 def start_labeling_machine():
-    LABELING_START_PIN.on()
+    lgpio.gpio_write(chip_handle, LABELING_START_PIN, 1)
     time.sleep(2)
-    LABELING_START_PIN.off()
+    lgpio.gpio_write(chip_handle, LABELING_START_PIN, 0)
     print("Labeling machine started.")
 
 def stop_labeling_machine():
-    LABELING_STOP_PIN.on()
+    lgpio.gpio_write(chip_handle, LABELING_STOP_PIN, 1)
     time.sleep(2)
-    LABELING_STOP_PIN.off()
+    lgpio.gpio_write(chip_handle, LABELING_STOP_PIN, 0)
     print("Labeling machine stopped.")
-
-def start_filling_machine():
-    FILLING_STOP_PIN.off()
-    print("Filling machine started.")
-
-def stop_filling_machine():
-    FILLING_STOP_PIN.on()
-    print("Filling machine stopped.")
-
-def start_blowing_machine():
-    BLOWING_START_PIN.on()
-    BLOWING_STOP_PIN.off()
-    print("Blowing machine started.")
-
-def stop_blowing_machine():
-    BLOWING_START_PIN.off()
-    BLOWING_STOP_PIN.on()
-    print("Blowing machine stopped.")

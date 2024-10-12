@@ -1,24 +1,29 @@
-from gpiozero import LED, Button
+import lgpio
+import time
 
-# Initialize all necessary GPIO components
-def initialize_gpio():
-    global LABELING_START_PIN, LABELING_STOP_PIN, FILLING_STOP_PIN, BLOWING_START_PIN, BLOWING_STOP_PIN
-    global SENSOR1_PIN, SENSOR2_PIN
+# Define the GPIO pins
+LABELING_START_PIN = 4
+LABELING_STOP_PIN = 27
+FILLING_STOP_PIN = 23
+BLOWING_START_PIN = 24
+BLOWING_STOP_PIN = 22
+SENSOR1_PIN = 19
+SENSOR2_PIN = 20
 
-    # Machine control pins as LEDs for simplicity
-    LABELING_START_PIN = LED(4)
-    LABELING_STOP_PIN = LED(27)
-    FILLING_STOP_PIN = LED(23)
-    BLOWING_START_PIN = LED(24)
-    BLOWING_STOP_PIN = LED(22)
+# Initialize GPIO chip (usually 0 on Pi)
+chip_handle = lgpio.gpiochip_open(0)
 
-    # Use pull_up for sensors as with the previously working setup
-    SENSOR1_PIN = Button(19, pull_up=True)
-    SENSOR2_PIN = Button(20, pull_up=True)
+# Setup output pins
+lgpio.gpio_claim_output(chip_handle, LABELING_START_PIN)
+lgpio.gpio_claim_output(chip_handle, LABELING_STOP_PIN)
+lgpio.gpio_claim_output(chip_handle, FILLING_STOP_PIN)
+lgpio.gpio_claim_output(chip_handle, BLOWING_START_PIN)
+lgpio.gpio_claim_output(chip_handle, BLOWING_STOP_PIN)
 
+# Setup input pins
+lgpio.gpio_claim_input(chip_handle, SENSOR1_PIN)
+lgpio.gpio_claim_input(chip_handle, SENSOR2_PIN)
+
+# Function to release GPIO resources
 def cleanup_gpio():
-    # Close all components at cleanup
-    LABELING_START_PIN.close()
-    LABELING_STOP_PIN.close()
-    FILLING_STOP_PIN.close()
-    BLOWING_START_PIN.close()
+    lgpio.gpiochip_close(chip_handle)
