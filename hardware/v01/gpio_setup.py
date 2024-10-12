@@ -1,23 +1,26 @@
-# def initialize_gpio(GPIO, LABELING_START_PIN, LABELING_STOP_PIN, FILLING_STOP_PIN, BLOWING_START_PIN, BLOWING_STOP_PIN,
-#                     LABELING_WORKING_PIN, LABELING_ALARM_PIN, LABELING_ALARM_HANDLED_PIN,
-#                     FILLING_WORKING_PIN, FILLING_ALARM_PIN, FILLING_ALARM_HANDLED_PIN,
-#                     BLOWING_WORKING_PIN, BLOWING_ALARM_PIN, SENSOR1_PIN, SENSOR2_PIN):
-#     GPIO.setmode(GPIO.BCM)
-    
-#     # Set up GPIO outputs
-#     GPIO.setup([LABELING_START_PIN, LABELING_STOP_PIN, FILLING_STOP_PIN, BLOWING_START_PIN, BLOWING_STOP_PIN], GPIO.OUT)
-    
-#     # Set up GPIO inputs
-#     GPIO.setup([LABELING_WORKING_PIN, LABELING_ALARM_PIN, LABELING_ALARM_HANDLED_PIN,
-#                 FILLING_WORKING_PIN, FILLING_ALARM_PIN, FILLING_ALARM_HANDLED_PIN,
-#                 BLOWING_WORKING_PIN, BLOWING_ALARM_PIN, SENSOR1_PIN, SENSOR2_PIN], GPIO.IN)
+from gpiozero import Button, OutputDevice
 
-#     # Initialize outputs to off state (LOW)
-#     GPIO.output(LABELING_START_PIN, GPIO.LOW)
-#     GPIO.output(LABELING_STOP_PIN, GPIO.LOW)
-#     GPIO.output(FILLING_STOP_PIN, GPIO.LOW)
-#     GPIO.output(BLOWING_START_PIN, GPIO.LOW)
-#     GPIO.output(BLOWING_STOP_PIN, GPIO.LOW)
+# Define input and output devices using gpiozero
 
-# def cleanup_gpio(GPIO):
-#     GPIO.cleanup()
+# Labeling Machine
+labeling_start = OutputDevice(4)
+labeling_stop = OutputDevice(27)
+labeling_working = Button(21)
+labeling_alarm = Button(19)
+labeling_alarm_handled = Button(12)
+
+# Filling Machine
+filling_stop = OutputDevice(23)
+filling_working = Button(16)
+filling_alarm = Button(5)
+filling_alarm_handled = Button(6)
+
+# Blowing Machine
+blowing_start = OutputDevice(24)
+blowing_stop = OutputDevice(22)
+blowing_working = Button(18)
+blowing_alarm = Button(10)
+
+# Sensors
+sensor1 = Button(13)
+sensor2 = Button(26)
