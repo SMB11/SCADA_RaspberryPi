@@ -20,33 +20,31 @@ filling_alarm = Button(5, pull_up=True)
 blowing_working = Button(18, pull_up=True)
 blowing_alarm = Button(10, pull_up=True)
 
-# Function to check sensor and increment counter if necessary, with traffic detection
-def check_sensor(sensor, sensor_counter, high_start):
-    global sensor1_traffic, sensor2_traffic
-
-    if sensor == sensor1:
-        traffic_flag = sensor1_traffic
-    else:
-        traffic_flag = sensor2_traffic
-
+# Function to check sensor and increment counter if necessary, with persistent traffic detection
+def check_sensor(sensor, sensor_counter, high_start, traffic_flag):
     if sensor.is_pressed:
         if high_start is None:
+            # New detection, increment counter and start traffic timer
             sensor_counter += 1
-            traffic_flag = False  # Reset traffic flag on new count
+            traffic_flag = False  # Reset traffic on new count
             time.sleep(0.2)  # Debounce
             return sensor_counter, time.time(), traffic_flag
         elif time.time() - high_start >= TRAFFIC_THRESHOLD:
-            traffic_flag = True  # Set traffic flag when threshold is exceeded
-            return sensor_counter, None, traffic_flag
+            # Keep traffic detected until sensor goes low
+            traffic_flag = True
+            return sensor_counter, high_start, traffic_flag
     else:
-        return sensor_counter, None, False  # Reset traffic flag when sensor is not pressed
+        # Sensor is released, clear traffic
+        traffic_flag = False
+        return sensor_counter, None, traffic_flag
+
     return sensor_counter, high_start, traffic_flag
 
 # Function to update counters, machine statuses, and traffic status
 def update_gui():
     global sensor1_counter, sensor2_counter, sensor1_high_start, sensor2_high_start, sensor1_traffic, sensor2_traffic
-    sensor1_counter, sensor1_high_start, sensor1_traffic = check_sensor(sensor1, sensor1_counter, sensor1_high_start)
-    sensor2_counter, sensor2_high_start, sensor2_traffic = check_sensor(sensor2, sensor2_counter, sensor2_high_start)
+    sensor1_counter, sensor1_high_start, sensor1_traffic = check_sensor(sensor1, sensor1_counter, sensor1_high_start, sensor1_traffic)
+    sensor2_counter, sensor2_high_start, sensor2_traffic = check_sensor(sensor2, sensor2_counter, sensor2_high_start, sensor2_traffic)
 
     # Update counter labels
     sensor1_label.config(text=f"Sensor1 Counter: {sensor1_counter}")
