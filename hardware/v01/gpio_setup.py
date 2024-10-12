@@ -26,8 +26,8 @@ def initialize_gpio():
     BLOWING_ALARM_PIN = Button(10)
 
 def cleanup_gpio():
-    LABELING_START_PIN.off()
-    LABELING_STOP_PIN.off()
-    FILLING_STOP_PIN.off()
-    BLOWING_START_PIN.off()
-    BLOWING_STOP_PIN.off()
+    LABELING_START_PIN.close()
+    LABELING_STOP_PIN.close()
+    FILLING_STOP_PIN.close()
+    BLOWING_START_PIN.close()
+    BLOWING_STOP_PIN.close()
