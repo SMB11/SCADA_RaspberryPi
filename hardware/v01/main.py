@@ -1,4 +1,5 @@
 import time
+import tkinter as tk
 from gpiozero import Button
 from control import start_labeling_machine, stop_labeling_machine, start_filling_machine, stop_filling_machine, start_blowing_machine, stop_blowing_machine
 
@@ -7,11 +8,9 @@ sensor1_counter = 0
 sensor2_counter = 0
 TRAFFIC_THRESHOLD = 2  # Time in seconds to consider traffic
 
-# Define GPIO pins for the sensors and machine status
+# Define GPIO pins directly for sensors and machine statuses
 sensor1 = Button(13, pull_up=True)
 sensor2 = Button(26, pull_up=True)
-
-# Machine status pins (replace with actual initialization)
 labeling_working = Button(21, pull_up=True)
 labeling_alarm = Button(19, pull_up=True)
 filling_working = Button(16, pull_up=True)
@@ -19,94 +18,87 @@ filling_alarm = Button(5, pull_up=True)
 blowing_working = Button(18, pull_up=True)
 blowing_alarm = Button(10, pull_up=True)
 
-def display_status():
-    print("\n-- System Status --")
-    print(f"Labeling Working: {'Pressed' if labeling_working.is_pressed else 'Released'}")
-    print(f"Labeling Alarm: {'Pressed' if labeling_alarm.is_pressed else 'Released'}")
-    print(f"Filling Working: {'Pressed' if filling_working.is_pressed else 'Released'}")
-    print(f"Filling Alarm: {'Pressed' if filling_alarm.is_pressed else 'Released'}")
-    print(f"Blowing Working: {'Pressed' if blowing_working.is_pressed else 'Released'}")
-    print(f"Blowing Alarm: {'Pressed' if blowing_alarm.is_pressed else 'Released'}")
-    print(f"Sensor1 Counter: {sensor1_counter}")
-    print(f"Sensor2 Counter: {sensor2_counter}")
-    print("\n")
-
-def manual_control():
-    command = input("Enter command (start_labeling, stop_labeling, start_filling, stop_filling, start_blowing, stop_blowing, reset, status, exit): ").strip()
-    if command == "start_labeling":
-        start_labeling_machine()
-    elif command == "stop_labeling":
-        stop_labeling_machine()
-    elif command == "start_filling":
-        start_filling_machine()
-    elif command == "stop_filling":
-        stop_filling_machine()
-    elif command == "start_blowing":
-        start_blowing_machine()
-    elif command == "stop_blowing":
-        stop_blowing_machine()
-    elif command == "reset":
-        global sensor1_counter, sensor2_counter
-        sensor1_counter = 0
-        sensor2_counter = 0
-        print("Counters reset.")
-    elif command == "status":
-        display_status()
-    elif command == "exit":
-        return False
-    else:
-        print("Invalid command. Try again.")
-    return True
-
+# Function to check sensor and increment counter if necessary
 def check_sensor(sensor, sensor_counter, high_start):
-    # Count bottle passing if sensor is pressed
     if sensor.is_pressed:
         if high_start is None:
-            # Only increment counter if not under traffic detection
             sensor_counter += 1
-            print(f"Sensor detected, count updated: {sensor_counter}")
             time.sleep(0.2)  # Debounce
-            return sensor_counter, time.time()  # Start traffic timer after count
-        else:
-            # Traffic detected, do not increment counter
-            if time.time() - high_start >= TRAFFIC_THRESHOLD:
-                print(f"Traffic detected on sensor")
-                return sensor_counter, None  # Reset timer after detecting traffic
+            return sensor_counter, time.time()
+        elif time.time() - high_start >= TRAFFIC_THRESHOLD:
+            return sensor_counter, None
     else:
-        # Sensor is not pressed, reset traffic timer
         return sensor_counter, None
-
     return sensor_counter, high_start
 
-def main():
+# Function to update counters and machine statuses
+def update_gui():
+    global sensor1_counter, sensor2_counter, sensor1_high_start, sensor2_high_start
+    sensor1_counter, sensor1_high_start = check_sensor(sensor1, sensor1_counter, sensor1_high_start)
+    sensor2_counter, sensor2_high_start = check_sensor(sensor2, sensor2_counter, sensor2_high_start)
+
+    # Update counter labels
+    sensor1_label.config(text=f"Sensor1 Counter: {sensor1_counter}")
+    sensor2_label.config(text=f"Sensor2 Counter: {sensor2_counter}")
+
+    # Update machine status labels
+    labeling_status_label.config(text=f"Labeling Working: {'Active' if labeling_working.is_pressed else 'Inactive'}")
+    labeling_alarm_label.config(text=f"Labeling Alarm: {'Active' if labeling_alarm.is_pressed else 'Inactive'}")
+    filling_status_label.config(text=f"Filling Working: {'Active' if filling_working.is_pressed else 'Inactive'}")
+    filling_alarm_label.config(text=f"Filling Alarm: {'Active' if filling_alarm.is_pressed else 'Inactive'}")
+    blowing_status_label.config(text=f"Blowing Working: {'Active' if blowing_working.is_pressed else 'Inactive'}")
+    blowing_alarm_label.config(text=f"Blowing Alarm: {'Active' if blowing_alarm.is_pressed else 'Inactive'}")
+
+    # Schedule the next update
+    root.after(100, update_gui)
+
+# Function to reset the counters
+def reset_counters():
     global sensor1_counter, sensor2_counter
-    sensor1_high_start = None
-    sensor2_high_start = None
-    last_status_display = time.time()
-    status_interval = 5  # Update status display every 5 seconds
+    sensor1_counter = 0
+    sensor2_counter = 0
+    sensor1_label.config(text=f"Sensor1 Counter: {sensor1_counter}")
+    sensor2_label.config(text=f"Sensor2 Counter: {sensor2_counter}")
 
-    try:
-        while True:
-            # Check sensor1
-            sensor1_counter, sensor1_high_start = check_sensor(sensor1, sensor1_counter, sensor1_high_start)
+# Initialize GUI
+root = tk.Tk()
+root.title("Bottling Line Control System")
 
-            # Check sensor2
-            sensor2_counter, sensor2_high_start = check_sensor(sensor2, sensor2_counter, sensor2_high_start)
+# Labels for displaying counter values
+sensor1_label = tk.Label(root, text=f"Sensor1 Counter: {sensor1_counter}")
+sensor1_label.pack()
+sensor2_label = tk.Label(root, text=f"Sensor2 Counter: {sensor2_counter}")
+sensor2_label.pack()
 
-            # Display status every 5 seconds
-            if time.time() - last_status_display >= status_interval:
-                display_status()
-                last_status_display = time.time()
+# Labels for machine statuses
+labeling_status_label = tk.Label(root, text="Labeling Working: Inactive")
+labeling_status_label.pack()
+labeling_alarm_label = tk.Label(root, text="Labeling Alarm: Inactive")
+labeling_alarm_label.pack()
+filling_status_label = tk.Label(root, text="Filling Working: Inactive")
+filling_status_label.pack()
+filling_alarm_label = tk.Label(root, text="Filling Alarm: Inactive")
+filling_alarm_label.pack()
+blowing_status_label = tk.Label(root, text="Blowing Working: Inactive")
+blowing_status_label.pack()
+blowing_alarm_label = tk.Label(root, text="Blowing Alarm: Inactive")
+blowing_alarm_label.pack()
 
-            # Allow for manual control at intervals
-            if not manual_control():
-                break
+# Buttons for controlling the machines
+tk.Button(root, text="Start Labeling", command=start_labeling_machine).pack()
+tk.Button(root, text="Stop Labeling", command=stop_labeling_machine).pack()
+tk.Button(root, text="Start Filling", command=start_filling_machine).pack()
+tk.Button(root, text="Stop Filling", command=stop_filling_machine).pack()
+tk.Button(root, text="Start Blowing", command=start_blowing_machine).pack()
+tk.Button(root, text="Stop Blowing", command=stop_blowing_machine).pack()
 
-            # Short sleep to avoid excessive CPU usage
-            time.sleep(0.1)
+# Button to reset counters
+tk.Button(root, text="Reset Counters", command=reset_counters).pack()
 
-    except KeyboardInterrupt:
-        print("Exiting program...")
+# Start the GUI update loop
+sensor1_high_start = None
+sensor2_high_start = None
+update_gui()
 
-if __name__ == "__main__":
-    main()
+# Run the GUI event loop
+root.mainloop()
