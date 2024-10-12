@@ -1,29 +1,23 @@
-import lgpio
-import time
+# def initialize_gpio(GPIO, LABELING_START_PIN, LABELING_STOP_PIN, FILLING_STOP_PIN, BLOWING_START_PIN, BLOWING_STOP_PIN,
+#                     LABELING_WORKING_PIN, LABELING_ALARM_PIN, LABELING_ALARM_HANDLED_PIN,
+#                     FILLING_WORKING_PIN, FILLING_ALARM_PIN, FILLING_ALARM_HANDLED_PIN,
+#                     BLOWING_WORKING_PIN, BLOWING_ALARM_PIN, SENSOR1_PIN, SENSOR2_PIN):
+#     GPIO.setmode(GPIO.BCM)
+    
+#     # Set up GPIO outputs
+#     GPIO.setup([LABELING_START_PIN, LABELING_STOP_PIN, FILLING_STOP_PIN, BLOWING_START_PIN, BLOWING_STOP_PIN], GPIO.OUT)
+    
+#     # Set up GPIO inputs
+#     GPIO.setup([LABELING_WORKING_PIN, LABELING_ALARM_PIN, LABELING_ALARM_HANDLED_PIN,
+#                 FILLING_WORKING_PIN, FILLING_ALARM_PIN, FILLING_ALARM_HANDLED_PIN,
+#                 BLOWING_WORKING_PIN, BLOWING_ALARM_PIN, SENSOR1_PIN, SENSOR2_PIN], GPIO.IN)
 
-# Define the GPIO pins
-LABELING_START_PIN = 4
-LABELING_STOP_PIN = 27
-FILLING_STOP_PIN = 23
-BLOWING_START_PIN = 24
-BLOWING_STOP_PIN = 22
-SENSOR1_PIN = 19
-SENSOR2_PIN = 20
+#     # Initialize outputs to off state (LOW)
+#     GPIO.output(LABELING_START_PIN, GPIO.LOW)
+#     GPIO.output(LABELING_STOP_PIN, GPIO.LOW)
+#     GPIO.output(FILLING_STOP_PIN, GPIO.LOW)
+#     GPIO.output(BLOWING_START_PIN, GPIO.LOW)
+#     GPIO.output(BLOWING_STOP_PIN, GPIO.LOW)
 
-# Initialize GPIO chip (usually 0 on Pi)
-chip_handle = lgpio.gpiochip_open(0)
-
-# Setup output pins
-lgpio.gpio_claim_output(chip_handle, LABELING_START_PIN)
-lgpio.gpio_claim_output(chip_handle, LABELING_STOP_PIN)
-lgpio.gpio_claim_output(chip_handle, FILLING_STOP_PIN)
-lgpio.gpio_claim_output(chip_handle, BLOWING_START_PIN)
-lgpio.gpio_claim_output(chip_handle, BLOWING_STOP_PIN)
-
-# Setup input pins
-lgpio.gpio_claim_input(chip_handle, SENSOR1_PIN)
-lgpio.gpio_claim_input(chip_handle, SENSOR2_PIN)
-
-# Function to release GPIO resources
-def cleanup_gpio():
-    lgpio.gpiochip_close(chip_handle)
+# def cleanup_gpio(GPIO):
+#     GPIO.cleanup()

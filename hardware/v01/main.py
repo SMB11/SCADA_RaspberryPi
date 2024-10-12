@@ -1,63 +1,98 @@
+import RPi.GPIO as GPIO
 import gpio_setup
-import inputs
-import control
-from signal import pause
+
+import time
+from control import *
+from inputs import *
+import time
+
+# gpio_setup.py
+
+from gpiozero import Button, OutputDevice
+
+# Define input and output devices using gpiozero
+
+# Labeling Machine
+labeling_start = OutputDevice(4)
+labeling_stop = OutputDevice(27)
+labeling_working = Button(21)
+labeling_alarm = Button(19)
+labeling_alarm_handled = Button(12)
+
+# Filling Machine
+filling_stop = OutputDevice(23)
+filling_working = Button(16)
+filling_alarm = Button(5)
+filling_alarm_handled = Button(6)
+
+# Blowing Machine
+blowing_start = OutputDevice(24)
+blowing_stop = OutputDevice(22)
+blowing_working = Button(18)
+blowing_alarm = Button(10)
+
+# Sensors
+sensor1 = Button(13)
+sensor2 = Button(26)
+
 
 def display_status():
-    print("\n-- Status --")
-    print(f"Sensor 1 count: {inputs.sensor1_counter}")
-    print(f"Sensor 2 count: {inputs.sensor2_counter}")
+    print("\n-- System Status --")
+    print(f"Sensor1 Bottle Count: {sensor1_counter}")
+    print(f"Sensor2 Bottle Count: {sensor2_counter}")
+    print(f"Labeling Working: {is_labeling_machine_working()}")
+    print(f"Labeling Alarm: {is_labeling_machine_in_alarm()}")
+    print(f"Filling Working: {is_filling_machine_working()}")
+    print(f"Filling Alarm: {is_filling_machine_in_alarm()}")
+    print(f"Blowing Working: {is_blowing_machine_working()}")
+    print(f"Blowing Alarm: {is_blowing_machine_in_alarm()}\n")
 
 def manual_control():
-    print("Commands:")
-    print("1. Start labeling")
-    print("2. Stop labeling")
-    print("3. Start filling")
-    print("4. Stop filling")
-    print("5. Start blowing")
-    print("6. Stop blowing")
-    print("7. Reset counts")
-    print("8. Exit")
-
-    choice = input("Choose command: ")
-    if choice == "1":
-        control.start_labeling_machine()
-    elif choice == "2":
-        control.stop_labeling_machine()
-    elif choice == "3":
-        control.start_filling_machine()
-    elif choice == "4":
-        control.stop_filling_machine()
-    elif choice == "5":
-        control.start_blowing_machine()
-    elif choice == "6":
-        control.stop_blowing_machine()
-    elif choice == "7":
-        inputs.reset_counters()
-    elif choice == "8":
+    print("Available commands:")
+    print("1. start_labeling")
+    print("2. stop_labeling")
+    print("3. start_filling")
+    print("4. stop_filling")
+    print("5. start_blowing")
+    print("6. stop_blowing")
+    print("7. reset_counters")
+    print("8. exit")
+    choice = input("Enter command: ")
+    if choice == "start_labeling":
+        start_labeling_machine()
+    elif choice == "stop_labeling":
+        stop_labeling_machine()
+    elif choice == "start_filling":
+        start_filling_machine()
+    elif choice == "stop_filling":
+        stop_filling_machine()
+    elif choice == "start_blowing":
+        start_blowing_machine()
+    elif choice == "stop_blowing":
+        stop_blowing_machine()
+    elif choice == "reset_counters":
+        reset_counters()
+    elif choice == "exit":
         return False
     else:
-        print("Invalid choice.")
+        print("Invalid command. Please try again.")
     return True
 
 def main():
-    gpio_setup.initialize_gpio()
-    inputs.initialize_sensor_events()
-
     try:
         while True:
+            count_sensor1_bottle()
+            count_sensor2_bottle()
+            if check_sensor1_traffic():
+                print("Traffic detected on Sensor1!")
+            if check_sensor2_traffic():
+                print("Traffic detected on Sensor2!")
             display_status()
-            inputs.check_traffic(inputs.SENSOR1_PIN, "Sensor 1")
-            inputs.check_traffic(inputs.SENSOR2_PIN, "Sensor 2")
             if not manual_control():
                 break
-            pause()  # Maintains the event-driven counting
-
+            time.sleep(0.5)
     except KeyboardInterrupt:
-        print("Program interrupted.")
-
-    finally:
-        gpio_setup.cleanup_gpio()
+        print("Exiting program...")
 
 if __name__ == "__main__":
     main()
