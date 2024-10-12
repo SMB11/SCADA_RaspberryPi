@@ -12,13 +12,13 @@ def stop_labeling_machine():
     labeling_stop.off()
     print("Labeling machine stopped.")
 
-def stop_filling_machine():
-    filling_stop.on()
-    print("Filling machine stopped.")
-
 def start_filling_machine():
     filling_stop.off()
     print("Filling machine started.")
+
+def stop_filling_machine():
+    filling_stop.on()
+    print("Filling machine stopped.")
 
 def start_blowing_machine():
     blowing_start.on()

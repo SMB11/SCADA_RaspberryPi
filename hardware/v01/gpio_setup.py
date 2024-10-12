@@ -1,7 +1,7 @@
 from gpiozero import Button, OutputDevice
 
 # Define output devices for machine control
-labeling_start = OutputDevice(9)
+labeling_start = OutputDevice(4)
 labeling_stop = OutputDevice(27)
 filling_stop = OutputDevice(23)
 blowing_start = OutputDevice(24)
@@ -17,6 +17,6 @@ filling_alarm_handled = Button(6, pull_up=True)
 blowing_working = Button(18, pull_up=True)
 blowing_alarm = Button(10, pull_up=True)
 
-# Define sensors for counting bottles with pull-up resistors and event handling
+# Define sensors for bottle counting
 sensor1 = Button(13, pull_up=True)
 sensor2 = Button(26, pull_up=True)

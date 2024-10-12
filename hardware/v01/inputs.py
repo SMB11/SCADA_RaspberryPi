@@ -1,79 +1,38 @@
 import time
-import gpio_setup
+from gpio_setup import sensor1, sensor2
+
+# Initialize counters and threshold
 sensor1_counter = 0
 sensor2_counter = 0
-TRAFFIC_THRESHOLD = 2
-COUNT_THRESHOLD = 0.2
+TRAFFIC_THRESHOLD = 2  # Time in seconds to consider traffic
 
-sensor1_high_start = None
-sensor2_high_start = None
-
-def is_labeling_machine_working():
-    return labeling_working.is_pressed
-
-def is_labeling_machine_in_alarm():
-    return labeling_alarm.is_pressed
-
-def is_labeling_machine_alarm_handled():
-    return labeling_alarm_handled.is_pressed
-
-def is_filling_machine_working():
-    return filling_working.is_pressed
-
-def is_filling_machine_in_alarm():
-    return filling_alarm.is_pressed
-
-def is_filling_machine_alarm_handled():
-    return filling_alarm_handled.is_pressed
-
-def is_blowing_machine_working():
-    return blowing_working.is_pressed
-
-def is_blowing_machine_in_alarm():
-    return blowing_alarm.is_pressed
-
-def check_sensor1_traffic():
-    global sensor1_high_start
-    if sensor1.is_pressed:
-        if sensor1_high_start is None:
-            sensor1_high_start = time.time()
-        elif time.time() - sensor1_high_start >= TRAFFIC_THRESHOLD:
-            sensor1_high_start = None
-            return True
-    else:
-        sensor1_high_start = None
-    return False
-
-def check_sensor2_traffic():
-    global sensor2_high_start
-    if sensor2.is_pressed:
-        if sensor2_high_start is None:
-            sensor2_high_start = time.time()
-        elif time.time() - sensor2_high_start >= TRAFFIC_THRESHOLD:
-            sensor2_high_start = None
-            return True
-    else:
-        sensor2_high_start = None
-    return False
-
-def count_sensor1_bottle():
+def check_sensor1():
     global sensor1_counter
     if sensor1.is_pressed:
-        time.sleep(COUNT_THRESHOLD)
-        if not sensor1.is_pressed:
-            sensor1_counter += 1
-            print(f"Bottle counted on Sensor1: {sensor1_counter}")
+        sensor1_counter += 1
+        print(f"Sensor1 count: {sensor1_counter}")
+        time.sleep(0.1)  # Debounce delay
 
-def count_sensor2_bottle():
+def check_sensor2():
     global sensor2_counter
     if sensor2.is_pressed:
-        time.sleep(COUNT_THRESHOLD)
-        if not sensor2.is_pressed:
-            sensor2_counter += 1
-            print(f"Bottle counted on Sensor2: {sensor2_counter}")
+        sensor2_counter += 1
+        print(f"Sensor2 count: {sensor2_counter}")
+        time.sleep(0.1)  # Debounce delay
+
+def detect_traffic(sensor, high_start):
+    if sensor.is_pressed:
+        if high_start is None:
+            return time.time()
+        elif time.time() - high_start >= TRAFFIC_THRESHOLD:
+            print("Traffic detected!")
+            return None  # Reset after detection
+    else:
+        return None
+    return high_start
 
 def reset_counters():
     global sensor1_counter, sensor2_counter
     sensor1_counter = 0
     sensor2_counter = 0
-    print("Bottle counters reset.")
+    print("Counters reset.")
