@@ -1,50 +1,33 @@
-
 import time
 
 sensor1_counter = 0
 sensor2_counter = 0
-
 TRAFFIC_THRESHOLD = 2
-COUNT_THRESHOLD = 0.2
 
-def is_labeling_machine_working():
-    return LABELING_WORKING_PIN.is_pressed
-
-def is_labeling_machine_in_alarm():
-    return LABELING_ALARM_PIN.is_pressed
-
-def is_filling_machine_working():
-    return FILLING_WORKING_PIN.is_pressed
-
-def check_sensor1_traffic():
-    start_time = time.time()
-    while SENSOR1_PIN.is_pressed:
-        if time.time() - start_time >= TRAFFIC_THRESHOLD:
-            return True
-    return False
-
-def check_sensor2_traffic():
-    start_time = time.time()
-    while SENSOR2_PIN.is_pressed:
-        if time.time() - start_time >= TRAFFIC_THRESHOLD:
-            return True
-    return False
-
-def count_sensor1_bottle():
+# Event handling for counting bottles
+def sensor1_detected():
     global sensor1_counter
-    if SENSOR1_PIN.is_pressed:
-        time.sleep(COUNT_THRESHOLD)
-        if not SENSOR1_PIN.is_pressed:
-            sensor1_counter += 1
-            print(f"Bottle counted on Sensor1: {sensor1_counter}")
+    sensor1_counter += 1
+    print(f"Sensor 1: Bottle count = {sensor1_counter}")
 
-def count_sensor2_bottle():
+def sensor2_detected():
     global sensor2_counter
-    if SENSOR2_PIN.is_pressed:
-        time.sleep(COUNT_THRESHOLD)
-        if not SENSOR2_PIN.is_pressed:
-            sensor2_counter += 1
-            print(f"Bottle counted on Sensor2: {sensor2_counter}")
+    sensor2_counter += 1
+    print(f"Sensor 2: Bottle count = {sensor2_counter}")
+
+# Traffic detection for prolonged high signal
+def check_sensor_traffic(sensor, sensor_name):
+    start_time = time.time()
+    if sensor.is_pressed:
+        if time.time() - start_time >= TRAFFIC_THRESHOLD:
+            print(f"Traffic detected on {sensor_name}")
+            return True
+    return False
+
+# Initialize sensor events
+def initialize_sensor_events():
+    SENSOR1_PIN.when_pressed = sensor1_detected
+    SENSOR2_PIN.when_pressed = sensor2_detected
 
 def reset_counters():
     global sensor1_counter, sensor2_counter

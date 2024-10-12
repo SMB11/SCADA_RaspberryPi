@@ -1,18 +1,12 @@
-
 import gpio_setup
 import control
 import inputs
-import time
+from signal import pause
 
 def display_status():
     print("\n-- System Status --")
-    print(f"Sensor1 Bottle Count: {inputs.sensor1_counter}")
-    print(f"Sensor2 Bottle Count: {inputs.sensor2_counter}")
-    print(f"Labeling Working: {inputs.is_labeling_machine_working()}")
-    print(f"Labeling Alarm: {inputs.is_labeling_machine_in_alarm()}")
-    print(f"Filling Working: {inputs.is_filling_machine_working()}")
-    print(f"Traffic on Sensor1: {inputs.check_sensor1_traffic()}")
-    print(f"Traffic on Sensor2: {inputs.check_sensor2_traffic()}\n")
+    print(f"Sensor 1 Bottle Count: {inputs.sensor1_counter}")
+    print(f"Sensor 2 Bottle Count: {inputs.sensor2_counter}")
 
 def manual_control():
     print("Available commands:")
@@ -24,9 +18,8 @@ def manual_control():
     print("6. stop_blowing")
     print("7. reset_counters")
     print("8. exit")
-    
+
     choice = input("Enter command: ")
-    
     if choice == "start_labeling":
         control.start_labeling_machine()
     elif choice == "stop_labeling":
@@ -44,26 +37,23 @@ def manual_control():
     elif choice == "exit":
         return False
     else:
-        print("Invalid command. Please try again.")
-    
+        print("Invalid command.")
     return True
 
 def main():
     gpio_setup.initialize_gpio()
+    inputs.initialize_sensor_events()
 
     try:
         while True:
-            inputs.count_sensor1_bottle()
-            inputs.count_sensor2_bottle()
-
-            # Display the status
             display_status()
+            # Check for traffic
+            inputs.check_sensor_traffic(inputs.SENSOR1_PIN, "Sensor 1")
+            inputs.check_sensor_traffic(inputs.SENSOR2_PIN, "Sensor 2")
             
-            # Manual control
             if not manual_control():
                 break
-
-            time.sleep(0.5)
+            pause()
 
     except KeyboardInterrupt:
         print("Exiting program...")
