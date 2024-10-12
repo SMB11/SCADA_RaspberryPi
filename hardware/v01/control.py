@@ -1,31 +1,32 @@
+
 import time
 
-def start_labeling_machine(GPIO, LABELING_START_PIN, LABELING_STOP_PIN):
-    GPIO.output(LABELING_START_PIN, GPIO.HIGH)
-    time.sleep(2)  # Hold high for 2 seconds
-    GPIO.output(LABELING_START_PIN, GPIO.LOW)
+def start_labeling_machine():
+    LABELING_START_PIN.on()
+    time.sleep(2)
+    LABELING_START_PIN.off()
     print("Labeling machine started.")
 
-def stop_labeling_machine(GPIO, LABELING_START_PIN, LABELING_STOP_PIN):
-    GPIO.output(LABELING_STOP_PIN, GPIO.HIGH)
-    time.sleep(2)  # Hold high for 2 seconds
-    GPIO.output(LABELING_STOP_PIN, GPIO.LOW)
+def stop_labeling_machine():
+    LABELING_STOP_PIN.on()
+    time.sleep(2)
+    LABELING_STOP_PIN.off()
     print("Labeling machine stopped.")
 
-def stop_filling_machine(GPIO, FILLING_STOP_PIN):
-    GPIO.output(FILLING_STOP_PIN, GPIO.HIGH)
+def stop_filling_machine():
+    FILLING_STOP_PIN.on()
     print("Filling machine stopped.")
-    
-def start_filling_machine(GPIO, FILLING_STOP_PIN):
-    GPIO.output(FILLING_STOP_PIN, GPIO.LOW)
+
+def start_filling_machine():
+    FILLING_STOP_PIN.off()
     print("Filling machine started.")
 
-def start_blowing_machine(GPIO, BLOWING_START_PIN, BLOWING_STOP_PIN):
-    GPIO.output(BLOWING_START_PIN, GPIO.HIGH)
-    GPIO.output(BLOWING_STOP_PIN, GPIO.LOW)
+def start_blowing_machine():
+    BLOWING_START_PIN.on()
+    BLOWING_STOP_PIN.off()
     print("Blowing machine started.")
 
-def stop_blowing_machine(GPIO, BLOWING_START_PIN, BLOWING_STOP_PIN):
-    GPIO.output(BLOWING_START_PIN, GPIO.LOW)
-    GPIO.output(BLOWING_STOP_PIN, GPIO.HIGH)
+def stop_blowing_machine():
+    BLOWING_START_PIN.off()
+    BLOWING_STOP_PIN.on()
     print("Blowing machine stopped.")
