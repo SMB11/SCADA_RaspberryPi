@@ -1,8 +1,7 @@
 from gpiozero import LED, Button
-from gpiozero.pins.rpigpio import RPiGPIOFactory
+from gpiozero.pins.lgpio import LGPIOFactory
 
-# Set up the factory explicitly
-factory = RPiGPIOFactory()
+factory = LGPIOFactory()
 
 def initialize_gpio():
     global LABELING_START_PIN, LABELING_STOP_PIN, FILLING_STOP_PIN, BLOWING_START_PIN, BLOWING_STOP_PIN
