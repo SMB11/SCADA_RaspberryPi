@@ -1,26 +1,22 @@
 from gpiozero import Button, OutputDevice
 
-# Define input and output devices using gpiozero
-
-# Labeling Machine
+# Define output devices for machine control
 labeling_start = OutputDevice(4)
 labeling_stop = OutputDevice(27)
-labeling_working = Button(21)
-labeling_alarm = Button(19)
-labeling_alarm_handled = Button(12)
-
-# Filling Machine
 filling_stop = OutputDevice(23)
-filling_working = Button(16)
-filling_alarm = Button(5)
-filling_alarm_handled = Button(6)
-
-# Blowing Machine
 blowing_start = OutputDevice(24)
 blowing_stop = OutputDevice(22)
-blowing_working = Button(18)
-blowing_alarm = Button(10)
 
-# Sensors
-sensor1 = Button(13)
-sensor2 = Button(26)
+# Define input devices for status and alarm monitoring
+labeling_working = Button(21, pull_up=True)
+labeling_alarm = Button(19, pull_up=True)
+labeling_alarm_handled = Button(12, pull_up=True)
+filling_working = Button(16, pull_up=True)
+filling_alarm = Button(5, pull_up=True)
+filling_alarm_handled = Button(6, pull_up=True)
+blowing_working = Button(18, pull_up=True)
+blowing_alarm = Button(10, pull_up=True)
+
+# Define sensors for counting bottles with pull-up resistors and event handling
+sensor1 = Button(19, pull_up=True)
+sensor2 = Button(20, pull_up=True)

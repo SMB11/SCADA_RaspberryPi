@@ -1,5 +1,5 @@
 import time
-
+import gpio_setup
 sensor1_counter = 0
 sensor2_counter = 0
 TRAFFIC_THRESHOLD = 2
