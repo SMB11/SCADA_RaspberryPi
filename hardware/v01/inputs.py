@@ -1,10 +1,11 @@
 import time
 
+# Bottle counters
 sensor1_counter = 0
 sensor2_counter = 0
 TRAFFIC_THRESHOLD = 2
 
-# Event handling for counting bottles
+# Working bottle counting with events
 def sensor1_detected():
     global sensor1_counter
     sensor1_counter += 1
@@ -15,22 +16,24 @@ def sensor2_detected():
     sensor2_counter += 1
     print(f"Sensor 2: Bottle count = {sensor2_counter}")
 
-# Traffic detection for prolonged high signal
-def check_sensor_traffic(sensor, sensor_name):
-    start_time = time.time()
+# Check traffic using current sensor state and timestamp
+def check_traffic(sensor, sensor_name):
     if sensor.is_pressed:
-        if time.time() - start_time >= TRAFFIC_THRESHOLD:
-            print(f"Traffic detected on {sensor_name}")
-            return True
+        start_time = time.time()
+        while sensor.is_pressed:
+            if time.time() - start_time >= TRAFFIC_THRESHOLD:
+                print(f"Traffic detected on {sensor_name}")
+                return True
     return False
 
-# Initialize sensor events
+# Initialize sensors with working setup
 def initialize_sensor_events():
     SENSOR1_PIN.when_pressed = sensor1_detected
     SENSOR2_PIN.when_pressed = sensor2_detected
 
+# Reset counters
 def reset_counters():
     global sensor1_counter, sensor2_counter
     sensor1_counter = 0
     sensor2_counter = 0
-    print("Bottle counters reset.")
+    print("Counters reset.")
