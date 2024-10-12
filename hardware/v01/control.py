@@ -1,4 +1,5 @@
 import time
+from gpio_setup import *
 
 def start_labeling_machine():
     labeling_start.on()

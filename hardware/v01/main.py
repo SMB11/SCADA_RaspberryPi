@@ -1,18 +1,17 @@
 import time
 from control import *
 from inputs import *
-from gpio_setup import *
+from gpio_setup import labeling_working, labeling_alarm, filling_working, filling_alarm, blowing_working, blowing_alarm
 
 def display_status():
     print("\n-- System Status --")
-    print(f"Sensor1 Bottle Count: {sensor1_counter}")
-    print(f"Sensor2 Bottle Count: {sensor2_counter}")
-    print(f"Labeling Working: {labeling_working.is_pressed}")
-    print(f"Labeling Alarm: {labeling_alarm.is_pressed}")
-    print(f"Filling Working: {filling_working.is_pressed}")
-    print(f"Filling Alarm: {filling_alarm.is_pressed}")
-    print(f"Blowing Working: {blowing_working.is_pressed}")
-    print(f"Blowing Alarm: {blowing_alarm.is_pressed}\n")
+    print(f"Labeling Working: {'Pressed' if labeling_working.is_pressed else 'Released'}")
+    print(f"Labeling Alarm: {'Pressed' if labeling_alarm.is_pressed else 'Released'}")
+    print(f"Filling Working: {'Pressed' if filling_working.is_pressed else 'Released'}")
+    print(f"Filling Alarm: {'Pressed' if filling_alarm.is_pressed else 'Released'}")
+    print(f"Blowing Working: {'Pressed' if blowing_working.is_pressed else 'Released'}")
+    print(f"Blowing Alarm: {'Pressed' if blowing_alarm.is_pressed else 'Released'}\n")
+
 
 def manual_control():
     command = input("Enter command (start_labeling, stop_labeling, start_filling, stop_filling, start_blowing, stop_blowing, reset, status, exit): ").strip()
@@ -39,21 +38,22 @@ def manual_control():
     return True
 
 def main():
-    sensor1_high_start = None
-    sensor2_high_start = None
-
     try:
         while True:
+            # Continuously check the status of all inputs
+            display_status()
+
+            # Check sensors for counting bottles
             check_sensor1()
             check_sensor2()
-            sensor1_high_start = detect_traffic(sensor1, sensor1_high_start)
-            sensor2_high_start = detect_traffic(sensor2, sensor2_high_start)
 
-            if not manual_control():
-                break
-            time.sleep(0.1)
+            # You can also implement other checks here
+
+            # Short delay to avoid high CPU usage
+            time.sleep(1)
     except KeyboardInterrupt:
         print("Exiting program...")
+
 
 if __name__ == "__main__":
     main()

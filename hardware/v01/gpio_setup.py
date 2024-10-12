@@ -1,7 +1,7 @@
 from gpiozero import Button, OutputDevice
 
 # Define output devices for machine control
-labeling_start = OutputDevice(4)
+labeling_start = OutputDevice(9)
 labeling_stop = OutputDevice(27)
 filling_stop = OutputDevice(23)
 blowing_start = OutputDevice(24)
