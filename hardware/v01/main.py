@@ -1,3 +1,5 @@
+# for testing all equipment and manual control
+
 import time
 import tkinter as tk
 from gpiozero import Button
