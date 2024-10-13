@@ -8,9 +8,11 @@ from control import start_labeling_machine, stop_labeling_machine, start_filling
 sensor1_counter = 0
 sensor2_counter = 0
 TRAFFIC_THRESHOLD = 2  # Time in seconds to consider traffic
+NO_BOTTLE_TIMEOUT = 5  # Time in seconds to stop labeling if no bottles detected on sensor1
 sensor1_traffic = False
 sensor2_traffic = False
 automatic_mode = False  # Start with manual mode
+last_bottle_time = time.time()  # Track last time a bottle passed sensor1
 
 # Define GPIO pins directly for sensors and machine statuses
 sensor1 = Button(13, pull_up=True)
@@ -24,10 +26,13 @@ blowing_alarm = Button(10, pull_up=True)
 
 # Function to check sensor and increment counter if necessary, with persistent traffic detection
 def check_sensor(sensor, sensor_counter, high_start, traffic_flag):
+    global last_bottle_time
     if sensor.is_pressed:
         if high_start is None:
             sensor_counter += 1
             traffic_flag = False  # Reset traffic on new count
+            if sensor == sensor1:  # Only update last_bottle_time for sensor1
+                last_bottle_time = time.time()
             time.sleep(0.2)  # Debounce
             return sensor_counter, time.time(), traffic_flag
         elif time.time() - high_start >= TRAFFIC_THRESHOLD:
@@ -39,9 +44,10 @@ def check_sensor(sensor, sensor_counter, high_start, traffic_flag):
 
     return sensor_counter, high_start, traffic_flag
 
-# Function to handle automatic mode logic
+# Function to handle automatic mode logic, including no-bottle detection for sensor1
 def handle_automatic_mode():
     if automatic_mode:
+        # Stop filling and blowing machines if traffic detected on sensor1
         if sensor1_traffic:
             if filling_working.is_pressed:
                 stop_filling_machine()
@@ -53,10 +59,17 @@ def handle_automatic_mode():
             if not blowing_working.is_pressed:
                 start_blowing_machine()
 
+        # Stop labeling machine if traffic detected on sensor2
         if sensor2_traffic and labeling_working.is_pressed:
             stop_labeling_machine()
         elif not sensor2_traffic and not labeling_working.is_pressed:
             start_labeling_machine()
+
+        # No bottles on sensor1 for NO_BOTTLE_TIMEOUT duration
+        if time.time() - last_bottle_time >= NO_BOTTLE_TIMEOUT:
+            if labeling_working.is_pressed:
+                stop_labeling_machine()
+                print("Automatic mode: Labeling machine stopped due to no bottles on Sensor1.")
 
 # Function to update counters, machine statuses, traffic status, and handle automatic mode
 def update_gui():
@@ -100,12 +113,13 @@ def reset_counters():
 
 # Function to save settings
 def save_settings():
-    global TRAFFIC_THRESHOLD
+    global TRAFFIC_THRESHOLD, NO_BOTTLE_TIMEOUT
     try:
         TRAFFIC_THRESHOLD = float(traffic_threshold_entry.get())
-        print(f"Settings updated: Traffic Detection Time = {TRAFFIC_THRESHOLD} seconds")
+        NO_BOTTLE_TIMEOUT = float(no_bottle_timeout_entry.get())
+        print(f"Settings updated: Traffic Detection Time = {TRAFFIC_THRESHOLD} seconds, No Bottle Timeout = {NO_BOTTLE_TIMEOUT} seconds")
     except ValueError:
-        print("Invalid input for traffic detection time")
+        print("Invalid input for settings")
 
 # Initialize GUI
 root = tk.Tk()
@@ -164,6 +178,11 @@ ttk.Label(settings_tab, text="Traffic Detection Time (seconds):").pack(pady=10)
 traffic_threshold_entry = ttk.Entry(settings_tab)
 traffic_threshold_entry.insert(0, str(TRAFFIC_THRESHOLD))
 traffic_threshold_entry.pack(pady=5)
+
+ttk.Label(settings_tab, text="No Bottle Timeout (seconds):").pack(pady=10)
+no_bottle_timeout_entry = ttk.Entry(settings_tab)
+no_bottle_timeout_entry.insert(0, str(NO_BOTTLE_TIMEOUT))
+no_bottle_timeout_entry.pack(pady=5)
 
 save_button = ttk.Button(settings_tab, text="Save Settings", command=save_settings)
 save_button.pack(pady=10)
