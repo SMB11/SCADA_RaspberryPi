@@ -44,23 +44,31 @@ def check_sensor(sensor, sensor_counter, high_start, traffic_flag):
 # Function to handle automatic mode logic
 def handle_automatic_mode():
     if automatic_mode:
-        # Sample logic: stop machines if traffic is detected
-        if sensor1_traffic and not labeling_alarm.is_pressed:
+        # Traffic near sensor1: stop filling and blowing machines
+        if sensor1_traffic:
+            if filling_working.is_pressed:
+                stop_filling_machine()
+                print("Automatic mode: Filling machine stopped due to traffic near Sensor1.")
+            if blowing_working.is_pressed:
+                stop_blowing_machine()
+                print("Automatic mode: Blowing machine stopped due to traffic near Sensor1.")
+        # If traffic clears near sensor1, restart filling and blowing machines
+        else:
+            if not filling_working.is_pressed:
+                start_filling_machine()
+                print("Automatic mode: Filling machine restarted after traffic near Sensor1 cleared.")
+            if not blowing_working.is_pressed:
+                start_blowing_machine()
+                print("Automatic mode: Blowing machine restarted after traffic near Sensor1 cleared.")
+
+        # Traffic near sensor2: stop labeling machine
+        if sensor2_traffic and labeling_working.is_pressed:
             stop_labeling_machine()
-            print("Automatic mode: Labeling machine stopped due to traffic on Sensor1.")
-
-        if sensor2_traffic and not filling_alarm.is_pressed:
-            stop_filling_machine()
-            print("Automatic mode: Filling machine stopped due to traffic on Sensor2.")
-
-        # Example: Start machines if no traffic
-        if not sensor1_traffic and not labeling_working.is_pressed:
+            print("Automatic mode: Labeling machine stopped due to traffic near Sensor2.")
+        # If traffic clears near sensor2, restart labeling machine
+        elif not sensor2_traffic and not labeling_working.is_pressed:
             start_labeling_machine()
-            print("Automatic mode: Labeling machine started.")
-
-        if not sensor2_traffic and not filling_working.is_pressed:
-            start_filling_machine()
-            print("Automatic mode: Filling machine started.")
+            print("Automatic mode: Labeling machine restarted after traffic near Sensor2 cleared.")
 
 # Function to update counters, machine statuses, traffic status, and handle automatic mode
 def update_gui():
