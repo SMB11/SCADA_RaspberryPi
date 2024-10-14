@@ -17,7 +17,7 @@ last_bottle_time = time.time()  # Track last time a bottle passed sensor1
 # Define GPIO pins directly for sensors and machine statuses
 sensor1 = Button(13, pull_up=True)
 sensor2 = Button(26, pull_up=True)
-labeling_working = Button(21, pull_up=True)
+labeling_working = Button(20, pull_up=True)
 labeling_alarm = Button(19, pull_up=True)
 filling_working = Button(16, pull_up=True)
 filling_alarm = Button(5, pull_up=True)

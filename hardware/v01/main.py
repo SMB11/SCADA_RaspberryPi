@@ -1,5 +1,3 @@
-# for testing all equipment and manual control
-
 import time
 import tkinter as tk
 from gpiozero import Button
@@ -21,6 +19,7 @@ filling_working = Button(16, pull_up=True)
 filling_alarm = Button(5, pull_up=True)
 blowing_working = Button(18, pull_up=True)
 blowing_alarm = Button(10, pull_up=True)
+labeling_idle = Button(12, pull_up=True)  # New GPIO for labeling idle status
 
 # Function to check sensor and increment counter if necessary, with persistent traffic detection
 def check_sensor(sensor, sensor_counter, high_start, traffic_flag):
@@ -63,6 +62,9 @@ def update_gui():
     filling_alarm_label.config(text=f"Filling Alarm: {'Active' if filling_alarm.is_pressed else 'Inactive'}")
     blowing_status_label.config(text=f"Blowing Working: {'Active' if blowing_working.is_pressed else 'Inactive'}")
     blowing_alarm_label.config(text=f"Blowing Alarm: {'Active' if blowing_alarm.is_pressed else 'Inactive'}")
+    
+    # Update labeling idle status label
+    labeling_idle_label.config(text=f"Labeling Idle: {'Idle' if labeling_idle.is_pressed else 'Inactive'}")
 
     # Schedule the next update
     root.after(100, update_gui)
@@ -104,6 +106,10 @@ blowing_status_label = tk.Label(root, text="Blowing Working: Inactive")
 blowing_status_label.pack()
 blowing_alarm_label = tk.Label(root, text="Blowing Alarm: Inactive")
 blowing_alarm_label.pack()
+
+# Label for labeling idle status
+labeling_idle_label = tk.Label(root, text="Labeling Idle: Inactive")
+labeling_idle_label.pack()
 
 # Buttons for controlling the machines
 tk.Button(root, text="Start Labeling", command=start_labeling_machine).pack()
