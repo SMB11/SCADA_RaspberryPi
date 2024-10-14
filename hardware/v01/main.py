@@ -13,13 +13,13 @@ sensor2_traffic = False
 # Define GPIO pins directly for sensors and machine statuses
 sensor1 = Button(13, pull_up=True)
 sensor2 = Button(26, pull_up=True)
-labeling_working = Button(21, pull_up=True)
-labeling_alarm = Button(19, pull_up=True)
+labeling_working = Button(20, pull_down=True)
+labeling_alarm = Button(19, pull_down=True)
 filling_working = Button(16, pull_up=True)
 filling_alarm = Button(5, pull_up=True)
 blowing_working = Button(18, pull_up=True)
 blowing_alarm = Button(10, pull_up=True)
-labeling_idle = Button(12, pull_up=True)  # New GPIO for labeling idle status
+labeling_idle = Button(12, pull_down=True)  # New GPIO for labeling idle status
 
 # Function to check sensor and increment counter if necessary, with persistent traffic detection
 def check_sensor(sensor, sensor_counter, high_start, traffic_flag):
