@@ -1,85 +1,79 @@
 import time
 import tkinter as tk
-from tkinter import ttk
+import logging
 from gpiozero import Button
 from control import start_labeling_machine, stop_labeling_machine, start_filling_machine, stop_filling_machine, start_blowing_machine, stop_blowing_machine
 
-# Initialize counters, traffic flags, and automatic mode
+# Initialize counters and traffic thresholds
 sensor1_counter = 0
 sensor2_counter = 0
 TRAFFIC_THRESHOLD = 2  # Time in seconds to consider traffic
-NO_BOTTLE_TIMEOUT = 5  # Time in seconds to stop labeling if no bottles detected on sensor1
 sensor1_traffic = False
 sensor2_traffic = False
-automatic_mode = False  # Start with manual mode
-last_bottle_time = time.time()  # Track last time a bottle passed sensor1
+
+# Configure logging
+logging.basicConfig(filename='sensor_log.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
 
 # Define GPIO pins directly for sensors and machine statuses
 sensor1 = Button(13, pull_up=True)
 sensor2 = Button(26, pull_up=True)
-labeling_working = Button(20, pull_up=True)
-labeling_alarm = Button(19, pull_up=True)
+labeling_working = Button(20, pull_down=True)
+labeling_alarm = Button(19, pull_down=True)
 filling_working = Button(16, pull_up=True)
 filling_alarm = Button(5, pull_up=True)
 blowing_working = Button(18, pull_up=True)
 blowing_alarm = Button(10, pull_up=True)
+labeling_idle = Button(12, pull_down=True)  # New GPIO for labeling idle status
+
+# Helper function to log mechanism status
+def log_machine_status(name, status):
+    logging.info(f"{name} Status: {status}")
 
 # Function to check sensor and increment counter if necessary, with persistent traffic detection
-def check_sensor(sensor, sensor_counter, high_start, traffic_flag):
-    global last_bottle_time
+def check_sensor(sensor, sensor_counter, high_start, traffic_flag, sensor_name):
     if sensor.is_pressed:
         if high_start is None:
+            # New detection, increment counter and start traffic timer
             sensor_counter += 1
             traffic_flag = False  # Reset traffic on new count
-            if sensor == sensor1:  # Only update last_bottle_time for sensor1
-                last_bottle_time = time.time()
+            logging.info(f"{sensor_name} detected - Counter: {sensor_counter}")
             time.sleep(0.2)  # Debounce
             return sensor_counter, time.time(), traffic_flag
         elif time.time() - high_start >= TRAFFIC_THRESHOLD:
+            # Keep traffic detected until sensor goes low
+            if not traffic_flag:
+                logging.info(f"Traffic detected on {sensor_name}")
             traffic_flag = True
             return sensor_counter, high_start, traffic_flag
     else:
+        if traffic_flag:
+            logging.info(f"Traffic cleared on {sensor_name}")
+        # Sensor is released, clear traffic
         traffic_flag = False
         return sensor_counter, None, traffic_flag
 
     return sensor_counter, high_start, traffic_flag
 
-# Function to handle automatic mode logic, including no-bottle detection for sensor1
-def handle_automatic_mode():
-    if automatic_mode:
-        # Stop filling and blowing machines if traffic detected on sensor1
-        if sensor1_traffic:
-            if filling_working.is_pressed:
-                stop_filling_machine()
-            if blowing_working.is_pressed:
-                stop_blowing_machine()
-        else:
-            if not filling_working.is_pressed:
-                start_filling_machine()
-            if not blowing_working.is_pressed:
-                start_blowing_machine()
-
-        # Stop labeling machine if traffic detected on sensor2
-        if sensor2_traffic and labeling_working.is_pressed:
-            stop_labeling_machine()
-        elif not sensor2_traffic and not labeling_working.is_pressed:
-            start_labeling_machine()
-
-        # No bottles on sensor1 for NO_BOTTLE_TIMEOUT duration
-        if time.time() - last_bottle_time >= NO_BOTTLE_TIMEOUT:
-            if labeling_working.is_pressed:
-                stop_labeling_machine()
-                print("Automatic mode: Labeling machine stopped due to no bottles on Sensor1.")
-
-# Function to update counters, machine statuses, traffic status, and handle automatic mode
+# Function to update counters, machine statuses, and traffic status
 def update_gui():
     global sensor1_counter, sensor2_counter, sensor1_high_start, sensor2_high_start, sensor1_traffic, sensor2_traffic
-    sensor1_counter, sensor1_high_start, sensor1_traffic = check_sensor(sensor1, sensor1_counter, sensor1_high_start, sensor1_traffic)
-    sensor2_counter, sensor2_high_start, sensor2_traffic = check_sensor(sensor2, sensor2_counter, sensor2_high_start, sensor2_traffic)
+    sensor1_counter, sensor1_high_start, sensor1_traffic = check_sensor(sensor1, sensor1_counter, sensor1_high_start, sensor1_traffic, "Sensor1")
+    sensor2_counter, sensor2_high_start, sensor2_traffic = check_sensor(sensor2, sensor2_counter, sensor2_high_start, sensor2_traffic, "Sensor2")
+
+    # Log machine statuses if they change
+    log_machine_status("Labeling Working", "Active" if labeling_working.is_pressed else "Inactive")
+    log_machine_status("Labeling Alarm", "Active" if labeling_alarm.is_pressed else "Inactive")
+    log_machine_status("Filling Working", "Active" if filling_working.is_pressed else "Inactive")
+    log_machine_status("Filling Alarm", "Active" if filling_alarm.is_pressed else "Inactive")
+    log_machine_status("Blowing Working", "Active" if blowing_working.is_pressed else "Inactive")
+    log_machine_status("Blowing Alarm", "Active" if blowing_alarm.is_pressed else "Inactive")
+    log_machine_status("Labeling Idle", "Idle" if labeling_idle.is_pressed else "Inactive")
 
     # Update counter labels
     sensor1_label.config(text=f"Sensor1 Counter: {sensor1_counter}")
     sensor2_label.config(text=f"Sensor2 Counter: {sensor2_counter}")
+
+    # Update traffic status labels
     sensor1_traffic_label.config(text=f"Sensor1 Traffic: {'Detected' if sensor1_traffic else 'Clear'}")
     sensor2_traffic_label.config(text=f"Sensor2 Traffic: {'Detected' if sensor2_traffic else 'Clear'}")
 
@@ -90,18 +84,12 @@ def update_gui():
     filling_alarm_label.config(text=f"Filling Alarm: {'Active' if filling_alarm.is_pressed else 'Inactive'}")
     blowing_status_label.config(text=f"Blowing Working: {'Active' if blowing_working.is_pressed else 'Inactive'}")
     blowing_alarm_label.config(text=f"Blowing Alarm: {'Active' if blowing_alarm.is_pressed else 'Inactive'}")
-
-    # Handle automatic mode logic
-    handle_automatic_mode()
+    
+    # Update labeling idle status label
+    labeling_idle_label.config(text=f"Labeling Idle: {'Idle' if labeling_idle.is_pressed else 'Inactive'}")
 
     # Schedule the next update
     root.after(100, update_gui)
-
-# Function to toggle automatic mode
-def toggle_automatic_mode():
-    global automatic_mode
-    automatic_mode = not automatic_mode
-    mode_button.config(text="Automatic Mode" if not automatic_mode else "Manual Mode")
 
 # Function to reset the counters
 def reset_counters():
@@ -110,82 +98,52 @@ def reset_counters():
     sensor2_counter = 0
     sensor1_label.config(text=f"Sensor1 Counter: {sensor1_counter}")
     sensor2_label.config(text=f"Sensor2 Counter: {sensor2_counter}")
-
-# Function to save settings
-def save_settings():
-    global TRAFFIC_THRESHOLD, NO_BOTTLE_TIMEOUT
-    try:
-        TRAFFIC_THRESHOLD = float(traffic_threshold_entry.get())
-        NO_BOTTLE_TIMEOUT = float(no_bottle_timeout_entry.get())
-        print(f"Settings updated: Traffic Detection Time = {TRAFFIC_THRESHOLD} seconds, No Bottle Timeout = {NO_BOTTLE_TIMEOUT} seconds")
-    except ValueError:
-        print("Invalid input for settings")
+    logging.info("Counters reset")
 
 # Initialize GUI
 root = tk.Tk()
 root.title("Bottling Line Control System")
-root.geometry("400x500")
 
-# Create Tab Control
-tab_control = ttk.Notebook(root)
+# Labels for displaying counter values
+sensor1_label = tk.Label(root, text=f"Sensor1 Counter: {sensor1_counter}")
+sensor1_label.pack()
+sensor2_label = tk.Label(root, text=f"Sensor2 Counter: {sensor2_counter}")
+sensor2_label.pack()
 
-# Main Tab
-main_tab = ttk.Frame(tab_control)
-tab_control.add(main_tab, text='Main')
+# Labels for traffic status
+sensor1_traffic_label = tk.Label(root, text="Sensor1 Traffic: Clear")
+sensor1_traffic_label.pack()
+sensor2_traffic_label = tk.Label(root, text="Sensor2 Traffic: Clear")
+sensor2_traffic_label.pack()
 
-# Settings Tab
-settings_tab = ttk.Frame(tab_control)
-tab_control.add(settings_tab, text='Settings')
+# Labels for machine statuses
+labeling_status_label = tk.Label(root, text="Labeling Working: Inactive")
+labeling_status_label.pack()
+labeling_alarm_label = tk.Label(root, text="Labeling Alarm: Inactive")
+labeling_alarm_label.pack()
+filling_status_label = tk.Label(root, text="Filling Working: Inactive")
+filling_status_label.pack()
+filling_alarm_label = tk.Label(root, text="Filling Alarm: Inactive")
+filling_alarm_label.pack()
+blowing_status_label = tk.Label(root, text="Blowing Working: Inactive")
+blowing_status_label.pack()
+blowing_alarm_label = tk.Label(root, text="Blowing Alarm: Inactive")
+blowing_alarm_label.pack()
 
-# Display the tab control
-tab_control.pack(expand=1, fill="both")
+# Label for labeling idle status
+labeling_idle_label = tk.Label(root, text="Labeling Idle: Inactive")
+labeling_idle_label.pack()
 
-# Main Tab Widgets
-sensor1_label = ttk.Label(main_tab, text=f"Sensor1 Counter: {sensor1_counter}")
-sensor1_label.pack(pady=5)
-sensor2_label = ttk.Label(main_tab, text=f"Sensor2 Counter: {sensor2_counter}")
-sensor2_label.pack(pady=5)
-sensor1_traffic_label = ttk.Label(main_tab, text="Sensor1 Traffic: Clear")
-sensor1_traffic_label.pack(pady=5)
-sensor2_traffic_label = ttk.Label(main_tab, text="Sensor2 Traffic: Clear")
-sensor2_traffic_label.pack(pady=5)
+# Buttons for controlling the machines
+tk.Button(root, text="Start Labeling", command=start_labeling_machine).pack()
+tk.Button(root, text="Stop Labeling", command=stop_labeling_machine).pack()
+tk.Button(root, text="Start Filling", command=start_filling_machine).pack()
+tk.Button(root, text="Stop Filling", command=stop_filling_machine).pack()
+tk.Button(root, text="Start Blowing", command=start_blowing_machine).pack()
+tk.Button(root, text="Stop Blowing", command=stop_blowing_machine).pack()
 
-labeling_status_label = ttk.Label(main_tab, text="Labeling Working: Inactive")
-labeling_status_label.pack(pady=5)
-labeling_alarm_label = ttk.Label(main_tab, text="Labeling Alarm: Inactive")
-labeling_alarm_label.pack(pady=5)
-filling_status_label = ttk.Label(main_tab, text="Filling Working: Inactive")
-filling_status_label.pack(pady=5)
-filling_alarm_label = ttk.Label(main_tab, text="Filling Alarm: Inactive")
-filling_alarm_label.pack(pady=5)
-blowing_status_label = ttk.Label(main_tab, text="Blowing Working: Inactive")
-blowing_status_label.pack(pady=5)
-blowing_alarm_label = ttk.Label(main_tab, text="Blowing Alarm: Inactive")
-blowing_alarm_label.pack(pady=5)
-
-ttk.Button(main_tab, text="Start Labeling", command=start_labeling_machine).pack(pady=5)
-ttk.Button(main_tab, text="Stop Labeling", command=stop_labeling_machine).pack(pady=5)
-ttk.Button(main_tab, text="Start Filling", command=start_filling_machine).pack(pady=5)
-ttk.Button(main_tab, text="Stop Filling", command=stop_filling_machine).pack(pady=5)
-ttk.Button(main_tab, text="Start Blowing", command=start_blowing_machine).pack(pady=5)
-ttk.Button(main_tab, text="Stop Blowing", command=stop_blowing_machine).pack(pady=5)
-ttk.Button(main_tab, text="Reset Counters", command=reset_counters).pack(pady=5)
-mode_button = ttk.Button(main_tab, text="Automatic Mode", command=toggle_automatic_mode)
-mode_button.pack(pady=5)
-
-# Settings Tab Widgets
-ttk.Label(settings_tab, text="Traffic Detection Time (seconds):").pack(pady=10)
-traffic_threshold_entry = ttk.Entry(settings_tab)
-traffic_threshold_entry.insert(0, str(TRAFFIC_THRESHOLD))
-traffic_threshold_entry.pack(pady=5)
-
-ttk.Label(settings_tab, text="No Bottle Timeout (seconds):").pack(pady=10)
-no_bottle_timeout_entry = ttk.Entry(settings_tab)
-no_bottle_timeout_entry.insert(0, str(NO_BOTTLE_TIMEOUT))
-no_bottle_timeout_entry.pack(pady=5)
-
-save_button = ttk.Button(settings_tab, text="Save Settings", command=save_settings)
-save_button.pack(pady=10)
+# Button to reset counters
+tk.Button(root, text="Reset Counters", command=reset_counters).pack()
 
 # Start the GUI update loop
 sensor1_high_start = None

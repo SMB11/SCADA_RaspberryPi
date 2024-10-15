@@ -2,7 +2,7 @@ import time
 from gpiozero import OutputDevice
 
 # Define GPIO pins for machine control (change these as per your setup)
-labeling_start_pin = 9
+labeling_start_pin = 6
 labeling_stop_pin = 27
 filling_stop_pin = 23
 blowing_start_pin = 24
