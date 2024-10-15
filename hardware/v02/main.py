@@ -17,13 +17,13 @@ logging.basicConfig(filename='sensor_log.txt', level=logging.INFO, format='%(asc
 # Define GPIO pins directly for sensors and machine statuses
 sensor1 = Button(13, pull_up=True)
 sensor2 = Button(26, pull_up=True)
-labeling_working = Button(20, pull_down=True)
-labeling_alarm = Button(19, pull_down=True)
+labeling_working = Button(20, pull_up=True)
+labeling_alarm = Button(19, pull_up=True)
 filling_working = Button(16, pull_up=True)
 filling_alarm = Button(5, pull_up=True)
 blowing_working = Button(18, pull_up=True)
 blowing_alarm = Button(10, pull_up=True)
-labeling_idle = Button(12, pull_down=True)  # New GPIO for labeling idle status
+labeling_idle = Button(12, pull_up=True)  # New GPIO for labeling idle status
 
 # Helper function to log mechanism status
 def log_machine_status(name, status):
