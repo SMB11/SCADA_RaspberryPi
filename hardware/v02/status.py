@@ -15,12 +15,16 @@ blowing_alarm = Button(10, pull_up=True)
 labeling_idle = Button(12, pull_up=True)
 filling_idle = Button(5, pull_up=True)
 
-last_bottle_time = time.time()  # Track the last time a bottle was detected
+# Tracking time and flags for conditions
+last_bottle_time = time.time()
 labeling_timeout = 5  # Default timeout in seconds, adjustable via the GUI
 traffic_threshold = 2  # Default traffic threshold, adjustable via the GUI
-# Add a flag to track whether the labeling machine was stopped due to timeout
 
+# Flags for machine stop conditions
 labeling_stopped_due_to_timeout = False
+filling_stopped_due_to_traffic = False
+labeling_stopped_due_to_traffic = False
+
 def initialize_logging():
     logging.basicConfig(filename='machine_log.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
 
@@ -34,7 +38,7 @@ def check_sensor(sensor, sensor_counter, traffic_flag, traffic_threshold):
             logging.info(f"{sensor.pin} detected - Counter: {sensor_counter}")
             time.sleep(0.2)
             high_start = time.time()
-        elif time.time() - high_start >= traffic_threshold:  # Use traffic threshold here
+        elif time.time() - high_start >= traffic_threshold:
             traffic_flag = True
             logging.info(f"Traffic detected on {sensor.pin}")
     else:
@@ -44,27 +48,33 @@ def check_sensor(sensor, sensor_counter, traffic_flag, traffic_threshold):
     return sensor_counter, traffic_flag
 
 def check_auto_mode(auto_mode_enabled, stop_filling_for_traffic, sensor1_traffic, stop_labeling_for_traffic, sensor2_traffic, stop_labeling_for_timeout):
-    global last_bottle_time
+    global last_bottle_time, labeling_stopped_due_to_timeout, filling_stopped_due_to_traffic, labeling_stopped_due_to_traffic
     if auto_mode_enabled:
         current_time = time.time()
 
         # Stop and restart filling machine based on Sensor1 traffic
         if stop_filling_for_traffic:
             if sensor1_traffic:
-                logging.info("Auto mode: Stopping filling machine due to traffic near Sensor1")
-                stop_filling_machine()
-            else:
+                if not filling_stopped_due_to_traffic:
+                    logging.info("Auto mode: Stopping filling machine due to traffic near Sensor1")
+                    stop_filling_machine()
+                    filling_stopped_due_to_traffic = True
+            elif filling_stopped_due_to_traffic:
                 logging.info("Auto mode: Restarting filling machine as traffic near Sensor1 is cleared")
                 start_filling_machine()
+                filling_stopped_due_to_traffic = False
 
         # Stop and restart labeling machine based on Sensor2 traffic
         if stop_labeling_for_traffic:
             if sensor2_traffic:
-                logging.info("Auto mode: Stopping labeling machine due to traffic near Sensor2")
-                stop_labeling_machine()
-            else:
+                if not labeling_stopped_due_to_traffic:
+                    logging.info("Auto mode: Stopping labeling machine due to traffic near Sensor2")
+                    stop_labeling_machine()
+                    labeling_stopped_due_to_traffic = True
+            elif labeling_stopped_due_to_traffic:
                 logging.info("Auto mode: Restarting labeling machine as traffic near Sensor2 is cleared")
                 start_labeling_machine()
+                labeling_stopped_due_to_traffic = False
 
         # Stop labeling if enabled and no bottles have passed sensor1 within the specified timeout
         if stop_labeling_for_timeout:
@@ -72,13 +82,12 @@ def check_auto_mode(auto_mode_enabled, stop_filling_for_traffic, sensor1_traffic
                 if not labeling_stopped_due_to_timeout:
                     logging.info("Auto mode: Stopping labeling machine due to inactivity near Sensor1")
                     stop_labeling_machine()
-                    labeling_stopped_due_to_timeout = True  # Mark the machine as stopped due to timeout
+                    labeling_stopped_due_to_timeout = True
             elif labeling_stopped_due_to_timeout and sensor1.is_pressed:
-                # Restart only if the machine was stopped due to timeout and new bottles are passing
                 logging.info("Auto mode: Restarting labeling machine after inactivity near Sensor1 resolved")
                 start_labeling_machine()
-                labeling_stopped_due_to_timeout = False  # Reset the flag after restarting
-                
+                labeling_stopped_due_to_timeout = False
+
 def set_auto_mode(enabled):
     logging.info(f"Auto mode {'enabled' if enabled else 'disabled'}")
 
