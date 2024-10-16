@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 import logging
 from control import start_labeling_machine, stop_labeling_machine, start_filling_machine, stop_filling_machine, start_blowing_machine, stop_blowing_machine
-from status import check_sensor, check_auto_mode, initialize_logging, reset_counters, set_auto_mode, sensor1, sensor2
+from status import check_sensor, check_auto_mode, initialize_logging, reset_counters, set_auto_mode, sensor1, sensor2, set_labeling_timeout
 
 # Initialize logging
 initialize_logging()
@@ -14,7 +14,12 @@ root.title("Bottling Line Control System")
 
 # Initialize auto mode variables after creating the root window
 stop_filling_for_traffic = tk.BooleanVar()
-stop_labeling_for_traffic = tk.BooleanVar()  # New variable for stopping labeling on sensor2 traffic
+stop_labeling_for_traffic = tk.BooleanVar()
+labeling_timeout_value = tk.IntVar(value=5)  # Default timeout in seconds
+
+# Function to update the labeling timeout from settings tab
+def update_labeling_timeout():
+    set_labeling_timeout(labeling_timeout_value.get())
 
 # Initialize counters and traffic thresholds
 sensor1_counter = 0
@@ -46,12 +51,14 @@ def toggle_auto_mode():
     set_auto_mode(auto_mode_enabled)
     mode_status_label.config(text="Auto Mode Enabled" if auto_mode_enabled else "Manual Mode Enabled")
 
-# Initialize GUI components (manual tab, auto tab, etc.)
+# Initialize GUI components (manual tab, auto tab, settings tab, etc.)
 tab_control = ttk.Notebook(root)
 manual_tab = ttk.Frame(tab_control)
 auto_tab = ttk.Frame(tab_control)
+settings_tab = ttk.Frame(tab_control)
 tab_control.add(manual_tab, text="Manual Control")
 tab_control.add(auto_tab, text="Automatic Control")
+tab_control.add(settings_tab, text="Settings")
 tab_control.pack(expand=1, fill="both")
 
 # Manual Control Tab
@@ -65,8 +72,13 @@ tk.Button(manual_tab, text="Reset Counters", command=reset_counters).pack()
 
 # Automatic Control Tab
 tk.Checkbutton(auto_tab, text="Stop Filling Machine for Sensor1 Traffic", variable=stop_filling_for_traffic).pack()
-tk.Checkbutton(auto_tab, text="Stop Labeling Machine for Sensor2 Traffic", variable=stop_labeling_for_traffic).pack()  # New checkbox
+tk.Checkbutton(auto_tab, text="Stop Labeling Machine for Sensor2 Traffic", variable=stop_labeling_for_traffic).pack()
 tk.Button(auto_tab, text="Enable Auto Mode", command=toggle_auto_mode).pack()
+
+# Settings Tab
+tk.Label(settings_tab, text="Labeling Machine Timeout (seconds):").pack()
+tk.Entry(settings_tab, textvariable=labeling_timeout_value).pack()
+tk.Button(settings_tab, text="Update Timeout", command=update_labeling_timeout).pack()
 
 # Common labels for both tabs
 sensor1_label = tk.Label(root, text=f"Sensor1 Counter: {sensor1_counter}")
