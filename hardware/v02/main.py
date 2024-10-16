@@ -3,8 +3,8 @@ import tkinter as tk
 from tkinter import ttk
 import logging
 from control import start_labeling_machine, stop_labeling_machine, start_filling_machine, stop_filling_machine, start_blowing_machine, stop_blowing_machine
-
 from status import check_sensor, check_auto_mode, initialize_logging, reset_counters, set_auto_mode, sensor1, sensor2
+
 # Initialize logging
 initialize_logging()
 
@@ -34,6 +34,7 @@ def update_gui():
     sensor2_label.config(text=f"Sensor2 Counter: {sensor2_counter}")
     sensor1_traffic_label.config(text=f"Sensor1 Traffic: {'Detected' if sensor1_traffic else 'Clear'}")
     sensor2_traffic_label.config(text=f"Sensor2 Traffic: {'Detected' if sensor2_traffic else 'Clear'}")
+    mode_status_label.config(text="Auto Mode Enabled" if auto_mode_enabled else "Manual Mode Enabled")
 
     root.after(100, update_gui)
 
@@ -42,6 +43,7 @@ def toggle_auto_mode():
     global auto_mode_enabled
     auto_mode_enabled = not auto_mode_enabled
     set_auto_mode(auto_mode_enabled)
+    mode_status_label.config(text="Auto Mode Enabled" if auto_mode_enabled else "Manual Mode Enabled")
 
 # Initialize GUI components (manual tab, auto tab, etc.)
 tab_control = ttk.Notebook(root)
@@ -90,6 +92,10 @@ labeling_idle_label = tk.Label(root, text="Labeling Idle: Inactive")
 labeling_idle_label.pack()
 filling_idle_label = tk.Label(root, text="Filling Idle: Inactive")
 filling_idle_label.pack()
+
+# Add mode status label at the bottom of the GUI
+mode_status_label = tk.Label(root, text="Manual Mode Enabled", font=("Arial", 14))
+mode_status_label.pack(pady=10)
 
 # Start the GUI loop
 sensor1_high_start = None
