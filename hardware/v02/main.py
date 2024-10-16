@@ -67,6 +67,18 @@ def update_gui():
     sensor2_counter, sensor2_high_start, sensor2_traffic = check_sensor(sensor2, sensor2_counter, sensor2_high_start, sensor2_traffic)
 
     # Log machine status changes only if there is a change
+    
+    current_labeling_alarm = labeling_alarm.is_pressed
+    if current_labeling_alarm != prev_labeling_alarm:
+        logging.info(f"Labeling Alarm: {'Active' if current_labeling_alarm else 'Inactive'}")
+        prev_labeling_alarm = current_labeling_alarm  # Update previous state to current
+
+    current_filling_alarm = filling_alarm.is_pressed
+    if current_filling_alarm != prev_filling_alarm:
+        logging.info(f"Filling Alarm: {'Active' if current_filling_alarm else 'Inactive'}")
+        prev_filling_alarm = current_filling_alarm  # Update previous state to current
+
+    
     current_labeling_status = labeling_working.is_pressed
     if current_labeling_status != prev_labeling_status:
         logging.info(f"Labeling Working: {'Active' if current_labeling_status else 'Inactive'}")
