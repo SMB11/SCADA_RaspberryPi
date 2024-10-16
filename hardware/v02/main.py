@@ -12,8 +12,9 @@ initialize_logging()
 root = tk.Tk()
 root.title("Bottling Line Control System")
 
-# Initialize auto mode variable now that root is created
-stop_filling_for_traffic = tk.BooleanVar()  # Track if auto stop for filling is enabled
+# Initialize auto mode variables after creating the root window
+stop_filling_for_traffic = tk.BooleanVar()
+stop_labeling_for_traffic = tk.BooleanVar()  # New variable for stopping labeling on sensor2 traffic
 
 # Initialize counters and traffic thresholds
 sensor1_counter = 0
@@ -27,7 +28,7 @@ def update_gui():
     global sensor1_counter, sensor2_counter, sensor1_traffic, sensor2_traffic
     sensor1_counter, sensor1_traffic = check_sensor(sensor1, sensor1_counter, sensor1_traffic)
     sensor2_counter, sensor2_traffic = check_sensor(sensor2, sensor2_counter, sensor2_traffic)
-    check_auto_mode(auto_mode_enabled, stop_filling_for_traffic.get(), sensor1_traffic)
+    check_auto_mode(auto_mode_enabled, stop_filling_for_traffic.get(), sensor1_traffic, stop_labeling_for_traffic.get(), sensor2_traffic)
 
     # Update GUI Labels here
     sensor1_label.config(text=f"Sensor1 Counter: {sensor1_counter}")
@@ -64,6 +65,7 @@ tk.Button(manual_tab, text="Reset Counters", command=reset_counters).pack()
 
 # Automatic Control Tab
 tk.Checkbutton(auto_tab, text="Stop Filling Machine for Sensor1 Traffic", variable=stop_filling_for_traffic).pack()
+tk.Checkbutton(auto_tab, text="Stop Labeling Machine for Sensor2 Traffic", variable=stop_labeling_for_traffic).pack()  # New checkbox
 tk.Button(auto_tab, text="Enable Auto Mode", command=toggle_auto_mode).pack()
 
 # Common labels for both tabs

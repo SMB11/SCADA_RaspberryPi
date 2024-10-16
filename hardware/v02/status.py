@@ -1,6 +1,7 @@
 import time
 import logging
 from gpiozero import Button
+from control import stop_filling_machine, stop_labeling_machine
 
 # Define GPIO pins for sensors and statuses
 sensor1 = Button(13, pull_up=True)
@@ -34,10 +35,15 @@ def check_sensor(sensor, sensor_counter, traffic_flag):
         traffic_flag = False
     return sensor_counter, traffic_flag
 
-def check_auto_mode(auto_mode_enabled, stop_filling_for_traffic, sensor1_traffic):
-    if auto_mode_enabled and stop_filling_for_traffic and sensor1_traffic:
-        logging.info("Auto mode: Stopping filling machine due to traffic near Sensor1")
-        stop_filling_machine()
+def check_auto_mode(auto_mode_enabled, stop_filling_for_traffic, sensor1_traffic, stop_labeling_for_traffic, sensor2_traffic):
+    if auto_mode_enabled:
+        if stop_filling_for_traffic and sensor1_traffic:
+            logging.info("Auto mode: Stopping filling machine due to traffic near Sensor1")
+            stop_filling_machine()
+
+        if stop_labeling_for_traffic and sensor2_traffic:
+            logging.info("Auto mode: Stopping labeling machine due to traffic near Sensor2")
+            stop_labeling_machine()
 
 def set_auto_mode(enabled):
     logging.info(f"Auto mode {'enabled' if enabled else 'disabled'}")
