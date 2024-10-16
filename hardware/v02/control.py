@@ -1,7 +1,7 @@
 import time
 from gpiozero import OutputDevice
 
-# Define GPIO pins for machine control (change these as per your setup)
+# GPIO pin assignments
 labeling_start_pin = 6
 labeling_stop_pin = 27
 filling_stop_pin = 23
@@ -15,30 +15,29 @@ filling_stop = OutputDevice(filling_stop_pin)
 blowing_start = OutputDevice(blowing_start_pin)
 blowing_stop = OutputDevice(blowing_stop_pin)
 
-# Functions to control each machine
 def start_labeling_machine():
     labeling_start.on()
-    time.sleep(2)  # Hold high for 2 seconds to start
+    time.sleep(2)
     labeling_start.off()
     print("Labeling machine started.")
 
 def stop_labeling_machine():
     labeling_stop.on()
-    time.sleep(2)  # Hold high for 2 seconds to stop
+    time.sleep(2)
     labeling_stop.off()
     print("Labeling machine stopped.")
 
 def start_filling_machine():
-    filling_stop.off()  # Assume LOW starts the machine
+    filling_stop.off()
     print("Filling machine started.")
 
 def stop_filling_machine():
-    filling_stop.on()  # Assume HIGH stops the machine
+    filling_stop.on()
     print("Filling machine stopped.")
 
 def start_blowing_machine():
     blowing_start.on()
-    blowing_stop.off()  # Ensure stop is off when starting
+    blowing_stop.off()
     print("Blowing machine started.")
 
 def stop_blowing_machine():
