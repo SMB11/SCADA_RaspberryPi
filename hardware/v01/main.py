@@ -16,10 +16,11 @@ sensor2 = Button(26, pull_up=True)
 labeling_working = Button(20, pull_down=True)
 labeling_alarm = Button(19, pull_down=True)
 filling_working = Button(16, pull_up=True)
-filling_alarm = Button(5, pull_up=True)
+filling_alarm = Button(21, pull_up=True)
 blowing_working = Button(18, pull_up=True)
 blowing_alarm = Button(10, pull_up=True)
-labeling_idle = Button(12, pull_down=True)  # New GPIO for labeling idle status
+labeling_idle = Button(12, pull_down=True)  # GPIO for labeling idle status
+filling_idle = Button(5, pull_down=True)   # GPIO for filling idle status (change to your actual pin)
 
 # Function to check sensor and increment counter if necessary, with persistent traffic detection
 def check_sensor(sensor, sensor_counter, high_start, traffic_flag):
@@ -63,8 +64,9 @@ def update_gui():
     blowing_status_label.config(text=f"Blowing Working: {'Active' if blowing_working.is_pressed else 'Inactive'}")
     blowing_alarm_label.config(text=f"Blowing Alarm: {'Active' if blowing_alarm.is_pressed else 'Inactive'}")
     
-    # Update labeling idle status label
+    # Update idle status labels
     labeling_idle_label.config(text=f"Labeling Idle: {'Idle' if labeling_idle.is_pressed else 'Inactive'}")
+    filling_idle_label.config(text=f"Filling Idle: {'Idle' if filling_idle.is_pressed else 'Inactive'}")
 
     # Schedule the next update
     root.after(100, update_gui)
@@ -107,9 +109,11 @@ blowing_status_label.pack()
 blowing_alarm_label = tk.Label(root, text="Blowing Alarm: Inactive")
 blowing_alarm_label.pack()
 
-# Label for labeling idle status
+# Labels for idle statuses
 labeling_idle_label = tk.Label(root, text="Labeling Idle: Inactive")
 labeling_idle_label.pack()
+filling_idle_label = tk.Label(root, text="Filling Idle: Inactive")
+filling_idle_label.pack()
 
 # Buttons for controlling the machines
 tk.Button(root, text="Start Labeling", command=start_labeling_machine).pack()
