@@ -3,8 +3,8 @@ import tkinter as tk
 from tkinter import ttk
 import logging
 from control import start_labeling_machine, stop_labeling_machine, start_filling_machine, stop_filling_machine, start_blowing_machine, stop_blowing_machine
-from status import check_sensor, check_auto_mode, initialize_logging, reset_counters, set_auto_mode
 
+from status import check_sensor, check_auto_mode, initialize_logging, reset_counters, set_auto_mode, sensor1, sensor2
 # Initialize logging
 initialize_logging()
 
