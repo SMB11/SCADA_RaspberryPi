@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 import logging
 from control import start_labeling_machine, stop_labeling_machine, start_filling_machine, stop_filling_machine, start_blowing_machine, stop_blowing_machine
-from status import check_sensor, check_auto_mode, initialize_logging, reset_counters, set_auto_mode, sensor1, sensor2, set_labeling_timeout
+from status import check_sensor, check_auto_mode, initialize_logging, reset_counters, set_auto_mode, sensor1, sensor2, set_labeling_timeout, set_traffic_threshold
 
 # Initialize logging
 initialize_logging()
@@ -15,11 +15,17 @@ root.title("Bottling Line Control System")
 # Initialize auto mode variables after creating the root window
 stop_filling_for_traffic = tk.BooleanVar()
 stop_labeling_for_traffic = tk.BooleanVar()
+stop_labeling_for_timeout = tk.BooleanVar()  # New variable for labeling timeout
 labeling_timeout_value = tk.IntVar(value=5)  # Default timeout in seconds
+traffic_threshold_value = tk.IntVar(value=2)  # Default traffic threshold in seconds
 
 # Function to update the labeling timeout from settings tab
 def update_labeling_timeout():
     set_labeling_timeout(labeling_timeout_value.get())
+
+# Function to update the traffic threshold from settings tab
+def update_traffic_threshold():
+    set_traffic_threshold(traffic_threshold_value.get())
 
 # Initialize counters and traffic thresholds
 sensor1_counter = 0
@@ -31,9 +37,9 @@ auto_mode_enabled = False
 # Function to update GUI and call auto mode logic
 def update_gui():
     global sensor1_counter, sensor2_counter, sensor1_traffic, sensor2_traffic
-    sensor1_counter, sensor1_traffic = check_sensor(sensor1, sensor1_counter, sensor1_traffic)
-    sensor2_counter, sensor2_traffic = check_sensor(sensor2, sensor2_counter, sensor2_traffic)
-    check_auto_mode(auto_mode_enabled, stop_filling_for_traffic.get(), sensor1_traffic, stop_labeling_for_traffic.get(), sensor2_traffic)
+    sensor1_counter, sensor1_traffic = check_sensor(sensor1, sensor1_counter, sensor1_traffic, traffic_threshold_value.get())
+    sensor2_counter, sensor2_traffic = check_sensor(sensor2, sensor2_counter, sensor2_traffic, traffic_threshold_value.get())
+    check_auto_mode(auto_mode_enabled, stop_filling_for_traffic.get(), sensor1_traffic, stop_labeling_for_traffic.get(), sensor2_traffic, stop_labeling_for_timeout.get())
 
     # Update GUI Labels here
     sensor1_label.config(text=f"Sensor1 Counter: {sensor1_counter}")
@@ -73,12 +79,17 @@ tk.Button(manual_tab, text="Reset Counters", command=reset_counters).pack()
 # Automatic Control Tab
 tk.Checkbutton(auto_tab, text="Stop Filling Machine for Sensor1 Traffic", variable=stop_filling_for_traffic).pack()
 tk.Checkbutton(auto_tab, text="Stop Labeling Machine for Sensor2 Traffic", variable=stop_labeling_for_traffic).pack()
+tk.Checkbutton(auto_tab, text="Stop Labeling Machine if Sensor1 Inactive", variable=stop_labeling_for_timeout).pack()
 tk.Button(auto_tab, text="Enable Auto Mode", command=toggle_auto_mode).pack()
 
 # Settings Tab
 tk.Label(settings_tab, text="Labeling Machine Timeout (seconds):").pack()
 tk.Entry(settings_tab, textvariable=labeling_timeout_value).pack()
 tk.Button(settings_tab, text="Update Timeout", command=update_labeling_timeout).pack()
+
+tk.Label(settings_tab, text="Traffic Threshold (seconds):").pack()
+tk.Entry(settings_tab, textvariable=traffic_threshold_value).pack()
+tk.Button(settings_tab, text="Update Threshold", command=update_traffic_threshold).pack()
 
 # Common labels for both tabs
 sensor1_label = tk.Label(root, text=f"Sensor1 Counter: {sensor1_counter}")
