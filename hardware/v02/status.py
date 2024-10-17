@@ -121,4 +121,7 @@ def set_traffic_threshold(value):
     logging.info(f"Traffic threshold set to {traffic_threshold} seconds")
 
 def reset_counters():
+    global sensor1_counter, sensor2_counter
+    sensor1_counter = 0
+    sensor2_counter = 0
     logging.info("Counters reset")
