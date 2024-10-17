@@ -11,10 +11,10 @@ initialize_logging()
 # Main window setup
 root = tk.Tk()
 root.title("Bottling Line Control System")
-root.geometry("1100x600")
+root.geometry("1100x700")
 
 # Canvas for bottling line visualization
-canvas = tk.Canvas(root, width=700, height=600, bg="lightgray")
+canvas = tk.Canvas(root, width=800, height=600, bg="lightgray")
 canvas.grid(row=0, column=0, rowspan=2, padx=20, pady=20)
 
 # Define color mappings for machine status
@@ -22,19 +22,20 @@ status_colors = {"active": "green", "stopped": "red", "idle": "yellow"}
 
 # Create bottling line elements on the Canvas according to the structure in the image
 blowing_rect = canvas.create_rectangle(50, 50, 250, 130, fill=status_colors["idle"], outline="black", width=2)
-canvas.create_text(150, 140, text="Bottle Blowing Machine")
-canvas.create_line(250, 90, 350, 90, arrow=tk.LAST, width=3)  # Conveyor
+canvas.create_text(150, 90, text="Bottle Blowing Machine", anchor="center")
+canvas.create_line(250, 90, 350, 90, arrow=tk.LAST, width=3)  # Conveyor 1
 
 filling_rect = canvas.create_rectangle(350, 160, 550, 240, fill=status_colors["idle"], outline="black", width=2)
-canvas.create_text(450, 250, text="Bottle Filling Machine")
-canvas.create_line(300, 200, 350, 200, arrow=tk.LAST, width=3)  # Conveyor
+canvas.create_text(450, 200, text="Bottle Filling Machine", anchor="center")
+canvas.create_line(250, 200, 350, 200, arrow=tk.LAST, width=3)  # Conveyor 2
 
 labeling_rect = canvas.create_rectangle(50, 270, 250, 350, fill=status_colors["idle"], outline="black", width=2)
-canvas.create_text(150, 360, text="Bottle Labeling Machine")
-canvas.create_line(250, 310, 350, 310, arrow=tk.LAST, width=3)  # Conveyor
+canvas.create_text(150, 310, text="Bottle Labeling Machine", anchor="center")
+canvas.create_line(250, 310, 350, 310, arrow=tk.LAST, width=3)  # Conveyor 3
 
 packing_rect = canvas.create_rectangle(350, 380, 550, 460, fill=status_colors["idle"], outline="black", width=2)
-canvas.create_text(450, 470, text="Bottle Packing Machine")
+canvas.create_text(450, 420, text="Bottle Packing Machine", anchor="center")
+canvas.create_line(250, 420, 350, 420, arrow=tk.LAST, width=3)  # Conveyor 4
 
 # Function to get color based on machine status
 def get_status_color(working, alarm):
