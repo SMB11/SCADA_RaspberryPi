@@ -34,20 +34,36 @@ sensor1_traffic = False
 sensor2_traffic = False
 auto_mode_enabled = False
 
-# Function to update GUI and call auto mode logic
 def update_gui():
     global sensor1_counter, sensor2_counter, sensor1_traffic, sensor2_traffic
     sensor1_counter, sensor1_traffic = check_sensor(sensor1, sensor1_counter, sensor1_traffic, traffic_threshold_value.get())
     sensor2_counter, sensor2_traffic = check_sensor(sensor2, sensor2_counter, sensor2_traffic, traffic_threshold_value.get())
     check_auto_mode(auto_mode_enabled, stop_filling_for_traffic.get(), sensor1_traffic, stop_labeling_for_traffic.get(), sensor2_traffic, stop_labeling_for_timeout.get())
 
-    # Update GUI Labels here
+    # Update the counter labels
     sensor1_label.config(text=f"Sensor1 Counter: {sensor1_counter}")
     sensor2_label.config(text=f"Sensor2 Counter: {sensor2_counter}")
+
+    # Update traffic status labels
     sensor1_traffic_label.config(text=f"Sensor1 Traffic: {'Detected' if sensor1_traffic else 'Clear'}")
     sensor2_traffic_label.config(text=f"Sensor2 Traffic: {'Detected' if sensor2_traffic else 'Clear'}")
+
+    # Update machine status labels
+    labeling_status_label.config(text=f"Labeling Working: {'Active' if labeling_working.is_pressed else 'Inactive'}")
+    labeling_alarm_label.config(text=f"Labeling Alarm: {'Active' if labeling_alarm.is_pressed else 'Inactive'}")
+    filling_status_label.config(text=f"Filling Working: {'Active' if filling_working.is_pressed else 'Inactive'}")
+    filling_alarm_label.config(text=f"Filling Alarm: {'Active' if filling_alarm.is_pressed else 'Inactive'}")
+    blowing_status_label.config(text=f"Blowing Working: {'Active' if blowing_working.is_pressed else 'Inactive'}")
+    blowing_alarm_label.config(text=f"Blowing Alarm: {'Active' if blowing_alarm.is_pressed else 'Inactive'}")
+
+    # Update idle status labels
+    labeling_idle_label.config(text=f"Labeling Idle: {'Idle' if labeling_idle.is_pressed else 'Inactive'}")
+    filling_idle_label.config(text=f"Filling Idle: {'Idle' if filling_idle.is_pressed else 'Inactive'}")
+
+    # Update the auto mode status
     mode_status_label.config(text="Auto Mode Enabled" if auto_mode_enabled else "Manual Mode Enabled")
 
+    # Schedule the next update
     root.after(100, update_gui)
 
 # Function to toggle auto mode
