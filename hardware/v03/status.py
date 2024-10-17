@@ -1,7 +1,7 @@
 import time
 import logging
 from gpiozero import Button
-from control import start_filling_machine, start_labeling_machine, stop_filling_machine, stop_labeling_machine
+from control import start_filling_machine, start_labeling_machine, stop_filling_machine, stop_labeling_machine, start_blowing_machine,stop_blowing_machine
 
 # Define GPIO pins for sensors and statuses
 sensor1 = Button(13, pull_up=True)
