@@ -15,20 +15,25 @@ root.title("Bottling Line Control System")
 # Initialize auto mode variables after creating the root window
 stop_filling_for_traffic = tk.BooleanVar()
 stop_labeling_for_traffic = tk.BooleanVar()
-stop_labeling_for_timeout = tk.BooleanVar()  # New variable for labeling timeout
+stop_labeling_for_timeout = tk.BooleanVar()
 labeling_timeout_value = tk.IntVar(value=5)  # Default timeout in seconds
 traffic_threshold_value = tk.IntVar(value=2)  # Default traffic threshold in seconds
 
+# Function to validate and retrieve integer values with a default fallback
+def safe_get_int(var, default):
+    try:
+        return int(var.get())
+    except (tk.TclError, ValueError):
+        var.set(default)  # Reset to default if the value is invalid
+        return default
 
 # Function to update the labeling timeout from settings tab
 def update_labeling_timeout():
-    set_labeling_timeout(labeling_timeout_value.get())
+    set_labeling_timeout(safe_get_int(labeling_timeout_value, 5))
 
+# Function to update the traffic threshold from settings tab
 def update_traffic_threshold():
-    try:
-        set_traffic_threshold(traffic_threshold_value.get())
-    except ValueError:
-        logging.error("Invalid traffic threshold value.")
+    set_traffic_threshold(safe_get_int(traffic_threshold_value, 2))
 
 # Initialize counters and traffic thresholds
 sensor1_counter = 0
@@ -37,36 +42,23 @@ sensor1_traffic = False
 sensor2_traffic = False
 auto_mode_enabled = False
 
+# Function to update GUI and call auto mode logic
 def update_gui():
     global sensor1_counter, sensor2_counter, sensor1_traffic, sensor2_traffic
-    sensor1_counter, sensor1_traffic = check_sensor(sensor1, sensor1_counter, sensor1_traffic, traffic_threshold_value.get())
-    sensor2_counter, sensor2_traffic = check_sensor(sensor2, sensor2_counter, sensor2_traffic, traffic_threshold_value.get())
+    traffic_threshold = safe_get_int(traffic_threshold_value, 2)
+
+    sensor1_counter, sensor1_traffic = check_sensor(sensor1, sensor1_counter, sensor1_traffic, traffic_threshold)
+    sensor2_counter, sensor2_traffic = check_sensor(sensor2, sensor2_counter, sensor2_traffic, traffic_threshold)
+    
     check_auto_mode(auto_mode_enabled, stop_filling_for_traffic.get(), sensor1_traffic, stop_labeling_for_traffic.get(), sensor2_traffic, stop_labeling_for_timeout.get())
 
-    # Update the counter labels
+    # Update GUI Labels
     sensor1_label.config(text=f"Sensor1 Counter: {sensor1_counter}")
     sensor2_label.config(text=f"Sensor2 Counter: {sensor2_counter}")
-
-    # Update traffic status labels
     sensor1_traffic_label.config(text=f"Sensor1 Traffic: {'Detected' if sensor1_traffic else 'Clear'}")
     sensor2_traffic_label.config(text=f"Sensor2 Traffic: {'Detected' if sensor2_traffic else 'Clear'}")
-
-    # Update machine status labels
-    labeling_status_label.config(text=f"Labeling Working: {'Active' if labeling_working.is_pressed else 'Inactive'}")
-    labeling_alarm_label.config(text=f"Labeling Alarm: {'Active' if labeling_alarm.is_pressed else 'Inactive'}")
-    filling_status_label.config(text=f"Filling Working: {'Active' if filling_working.is_pressed else 'Inactive'}")
-    filling_alarm_label.config(text=f"Filling Alarm: {'Active' if filling_alarm.is_pressed else 'Inactive'}")
-    blowing_status_label.config(text=f"Blowing Working: {'Active' if blowing_working.is_pressed else 'Inactive'}")
-    blowing_alarm_label.config(text=f"Blowing Alarm: {'Active' if blowing_alarm.is_pressed else 'Inactive'}")
-
-    # Update idle status labels
-    labeling_idle_label.config(text=f"Labeling Idle: {'Idle' if labeling_idle.is_pressed else 'Inactive'}")
-    filling_idle_label.config(text=f"Filling Idle: {'Idle' if filling_idle.is_pressed else 'Inactive'}")
-
-    # Update the auto mode status
     mode_status_label.config(text="Auto Mode Enabled" if auto_mode_enabled else "Manual Mode Enabled")
 
-    # Schedule the next update
     root.after(100, update_gui)
 
 # Function to toggle auto mode
@@ -120,6 +112,7 @@ sensor1_traffic_label.pack()
 sensor2_traffic_label = tk.Label(root, text="Sensor2 Traffic: Clear")
 sensor2_traffic_label.pack()
 
+# Machine status labels
 labeling_status_label = tk.Label(root, text="Labeling Working: Inactive")
 labeling_status_label.pack()
 labeling_alarm_label = tk.Label(root, text="Labeling Alarm: Inactive")
