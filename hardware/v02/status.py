@@ -15,6 +15,10 @@ blowing_alarm = Button(10, pull_up=True)
 labeling_idle = Button(12, pull_up=True)
 filling_idle = Button(5, pull_up=True)
 
+# Define these global variables at the beginning of the file
+sensor1_high_start = None
+sensor2_high_start = None
+
 # Tracking time and flags for conditions
 last_bottle_time = time.time()
 labeling_timeout = 5  # Default timeout in seconds, adjustable via the GUI
