@@ -13,14 +13,14 @@ root = tk.Tk()
 root.title("Bottling Line Control System")
 root.geometry("1100x700")
 
+# Define color mappings for machine status
+status_colors = {"active": "green", "stopped": "red", "idle": "yellow"}
+
 # Canvas for bottling line visualization
 canvas = tk.Canvas(root, width=800, height=600, bg="lightgray")
 canvas.grid(row=0, column=0, rowspan=2, padx=20, pady=20)
 
-# Define color mappings for machine status
-status_colors = {"active": "green", "stopped": "red", "idle": "yellow"}
-
-# Create bottling line elements on the Canvas according to the structure in the image
+# Create bottling line elements on the Canvas according to your structure
 blowing_rect = canvas.create_rectangle(50, 50, 250, 130, fill=status_colors["idle"], outline="black", width=2)
 canvas.create_text(150, 90, text="Bottle Blowing Machine", anchor="center")
 canvas.create_line(250, 90, 350, 90, arrow=tk.LAST, width=3)  # Conveyor 1
@@ -57,14 +57,16 @@ def update_bottling_line():
     # Schedule next update
     root.after(1000, update_bottling_line)
 
-# Tab control for manual, automatic, and settings tabs
+# Tab control for manual, automatic, settings, and system status tabs
 tab_control = ttk.Notebook(root)
 manual_tab = ttk.Frame(tab_control)
 auto_tab = ttk.Frame(tab_control)
 settings_tab = ttk.Frame(tab_control)
+status_tab = ttk.Frame(tab_control)  # New System Status Tab
 tab_control.add(manual_tab, text="Manual Control")
 tab_control.add(auto_tab, text="Automatic Control")
 tab_control.add(settings_tab, text="Settings")
+tab_control.add(status_tab, text="System Status")
 tab_control.grid(row=0, column=1, padx=20, pady=20, sticky="nsew")
 
 # Manual Control Tab
@@ -95,17 +97,27 @@ tk.Label(settings_tab, text="Traffic Threshold (s):").pack()
 tk.Entry(settings_tab, textvariable=traffic_threshold_value).pack()
 tk.Button(settings_tab, text="Update Threshold", command=lambda: set_traffic_threshold(traffic_threshold_value.get())).pack()
 
-# Common Status Frame
-status_frame = tk.Frame(root, bg="white", padx=10, pady=10)
-status_frame.grid(row=1, column=1, sticky="nsew")
-sensor1_label = tk.Label(status_frame, text="Sensor1 Counter: 0", bg="white")
-sensor2_label = tk.Label(status_frame, text="Sensor2 Counter: 0", bg="white")
-sensor1_traffic_label = tk.Label(status_frame, text="Sensor1 Traffic: Clear", bg="white")
-sensor2_traffic_label = tk.Label(status_frame, text="Sensor2 Traffic: Clear", bg="white")
-sensor1_label.pack()
-sensor2_label.pack()
-sensor1_traffic_label.pack()
-sensor2_traffic_label.pack()
+# System Status Tab
+tk.Label(status_tab, text="Blowing Machine Status").pack()
+tk.Label(status_tab, textvariable=tk.StringVar(value="Working" if blowing_working.is_pressed else "Inactive")).pack()
+tk.Label(status_tab, text="Blowing Machine Alarm").pack()
+tk.Label(status_tab, textvariable=tk.StringVar(value="Alarm" if blowing_alarm.is_pressed else "No Alarm")).pack()
+
+tk.Label(status_tab, text="Filling Machine Status").pack()
+tk.Label(status_tab, textvariable=tk.StringVar(value="Working" if filling_working.is_pressed else "Inactive")).pack()
+tk.Label(status_tab, text="Filling Machine Alarm").pack()
+tk.Label(status_tab, textvariable=tk.StringVar(value="Alarm" if filling_alarm.is_pressed else "No Alarm")).pack()
+
+tk.Label(status_tab, text="Labeling Machine Status").pack()
+tk.Label(status_tab, textvariable=tk.StringVar(value="Working" if labeling_working.is_pressed else "Inactive")).pack()
+tk.Label(status_tab, text="Labeling Machine Alarm").pack()
+tk.Label(status_tab, textvariable=tk.StringVar(value="Alarm" if labeling_alarm.is_pressed else "No Alarm")).pack()
+
+# Conveyor indicators (these can be configured similarly)
+tk.Label(status_tab, text="Labeling Idle").pack()
+tk.Label(status_tab, textvariable=tk.StringVar(value="Idle" if labeling_idle.is_pressed else "Active")).pack()
+tk.Label(status_tab, text="Filling Idle").pack()
+tk.Label(status_tab, textvariable=tk.StringVar(value="Idle" if filling_idle.is_pressed else "Active")).pack()
 
 # Start updating the bottling line visual
 update_bottling_line()
