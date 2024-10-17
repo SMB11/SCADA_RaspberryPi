@@ -11,7 +11,7 @@ initialize_logging()
 # Create the main Tkinter window
 root = tk.Tk()
 root.title("Bottling Line Control System")
-root.configure(bg="#f5f5f5")
+root.geometry("1000x600")  # Set a fixed window size
 
 # Initialize auto mode variables
 stop_filling_for_traffic = tk.BooleanVar()
@@ -64,16 +64,20 @@ def update_gui():
     mode_status_label.config(text="Auto Mode Enabled" if auto_mode_enabled else "Manual Mode Enabled")
 
     # Update machine status labels
-    labeling_status_label.config(text=f"Labeling Working: {'Active' if labeling_working.is_pressed else 'Inactive'}")
-    labeling_alarm_label.config(text=f"Labeling Alarm: {'Active' if labeling_alarm.is_pressed else 'Inactive'}")
-    filling_status_label.config(text=f"Filling Working: {'Active' if filling_working.is_pressed else 'Inactive'}")
-    filling_alarm_label.config(text=f"Filling Alarm: {'Active' if filling_alarm.is_pressed else 'Inactive'}")
-    blowing_status_label.config(text=f"Blowing Working: {'Active' if blowing_working.is_pressed else 'Inactive'}")
-    blowing_alarm_label.config(text=f"Blowing Alarm: {'Active' if blowing_alarm.is_pressed else 'Inactive'}")
-    labeling_idle_label.config(text=f"Labeling Idle: {'Idle' if labeling_idle.is_pressed else 'Inactive'}")
-    filling_idle_label.config(text=f"Filling Idle: {'Idle' if filling_idle.is_pressed else 'Inactive'}")
+    update_status(labeling_status_label, labeling_working.is_pressed)
+    update_status(labeling_alarm_label, labeling_alarm.is_pressed)
+    update_status(filling_status_label, filling_working.is_pressed)
+    update_status(filling_alarm_label, filling_alarm.is_pressed)
+    update_status(blowing_status_label, blowing_working.is_pressed)
+    update_status(blowing_alarm_label, blowing_alarm.is_pressed)
+    update_status(labeling_idle_label, labeling_idle.is_pressed)
+    update_status(filling_idle_label, filling_idle.is_pressed)
 
     root.after(100, update_gui)
+
+# Helper function for updating status labels with color
+def update_status(label, status):
+    label.config(text=("Active" if status else "Inactive"), fg=("green" if status else "red"))
 
 # Toggle auto mode
 def toggle_auto_mode():
@@ -95,69 +99,85 @@ def reset_gui_counters():
 # Styling elements
 label_bg = "#ffffff"
 label_font = ("Arial", 10)
-frame_bg = "#e0e0e0"
+frame_bg = "#f2f2f2"
 button_font = ("Arial", 12, "bold")
 
-# Create main frames for better structure
-control_frame = tk.Frame(root, bg=frame_bg, padx=10, pady=10)
-status_frame = tk.Frame(root, bg=frame_bg, padx=10, pady=10)
-control_frame.pack(fill="both", expand=True)
-status_frame.pack(fill="both", expand=True)
+# Main layout frames
+status_panel = tk.Frame(root, width=300, bg=frame_bg, padx=10, pady=10)
+control_panel = tk.Frame(root, bg=frame_bg, padx=10, pady=10)
+status_panel.pack(side="left", fill="y")
+control_panel.pack(side="right", expand=True, fill="both")
 
-# Tabs within control frame
-tab_control = ttk.Notebook(control_frame)
+# Status Frame Layout
+tk.Label(status_panel, text="System Status", font=("Arial", 16, "bold"), bg=frame_bg).grid(row=0, column=0, columnspan=2, pady=10)
+sensor1_label = tk.Label(status_panel, text="Sensor1 Counter: 0", font=label_font, bg=frame_bg)
+sensor1_label.grid(row=1, column=0, columnspan=2, sticky="w", pady=2)
+sensor2_label = tk.Label(status_panel, text="Sensor2 Counter: 0", font=label_font, bg=frame_bg)
+sensor2_label.grid(row=2, column=0, columnspan=2, sticky="w", pady=2)
+sensor1_traffic_label = tk.Label(status_panel, text="Sensor1 Traffic: Clear", font=label_font, bg=frame_bg)
+sensor1_traffic_label.grid(row=3, column=0, columnspan=2, sticky="w", pady=2)
+sensor2_traffic_label = tk.Label(status_panel, text="Sensor2 Traffic: Clear", font=label_font, bg=frame_bg)
+sensor2_traffic_label.grid(row=4, column=0, columnspan=2, sticky="w", pady=2)
+
+# Status indicators for machines
+tk.Label(status_panel, text="Labeling", font=("Arial", 14, "bold"), bg=frame_bg).grid(row=5, column=0, pady=10, sticky="w")
+labeling_status_label = tk.Label(status_panel, text="Inactive", font=label_font, bg=frame_bg)
+labeling_status_label.grid(row=5, column=1, sticky="e")
+labeling_alarm_label = tk.Label(status_panel, text="Inactive", font=label_font, bg=frame_bg)
+labeling_alarm_label.grid(row=6, column=1, sticky="e")
+labeling_idle_label = tk.Label(status_panel, text="Inactive", font=label_font, bg=frame_bg)
+labeling_idle_label.grid(row=7, column=1, sticky="e")
+
+tk.Label(status_panel, text="Filling", font=("Arial", 14, "bold"), bg=frame_bg).grid(row=8, column=0, pady=10, sticky="w")
+filling_status_label = tk.Label(status_panel, text="Inactive", font=label_font, bg=frame_bg)
+filling_status_label.grid(row=8, column=1, sticky="e")
+filling_alarm_label = tk.Label(status_panel, text="Inactive", font=label_font, bg=frame_bg)
+filling_alarm_label.grid(row=9, column=1, sticky="e")
+filling_idle_label = tk.Label(status_panel, text="Inactive", font=label_font, bg=frame_bg)
+filling_idle_label.grid(row=10, column=1, sticky="e")
+
+tk.Label(status_panel, text="Blowing", font=("Arial", 14, "bold"), bg=frame_bg).grid(row=11, column=0, pady=10, sticky="w")
+blowing_status_label = tk.Label(status_panel, text="Inactive", font=label_font, bg=frame_bg)
+blowing_status_label.grid(row=11, column=1, sticky="e")
+blowing_alarm_label = tk.Label(status_panel, text="Inactive", font=label_font, bg=frame_bg)
+blowing_alarm_label.grid(row=12, column=1, sticky="e")
+
+# Control Tabs in Control Panel
+tab_control = ttk.Notebook(control_panel)
 manual_tab = ttk.Frame(tab_control)
 auto_tab = ttk.Frame(tab_control)
 settings_tab = ttk.Frame(tab_control)
 tab_control.add(manual_tab, text="Manual Control")
 tab_control.add(auto_tab, text="Automatic Control")
 tab_control.add(settings_tab, text="Settings")
-tab_control.pack(expand=1, fill="both", padx=5, pady=5)
+tab_control.pack(expand=True, fill="both", padx=5, pady=5)
 
 # Manual Control Tab
-for btn_text, command in [("Start Labeling", start_labeling_machine), ("Stop Labeling", stop_labeling_machine),
-                          ("Start Filling", start_filling_machine), ("Stop Filling", stop_filling_machine),
-                          ("Start Blowing", start_blowing_machine), ("Stop Blowing", stop_blowing_machine),
-                          ("Reset Counters", reset_gui_counters)]:
-    tk.Button(manual_tab, text=btn_text, command=command, font=button_font, bg=label_bg).pack(pady=2, fill="x")
+tk.Button(manual_tab, text="Start Labeling", command=start_labeling_machine, font=button_font).pack(pady=5)
+tk.Button(manual_tab, text="Stop Labeling", command=stop_labeling_machine, font=button_font).pack(pady=5)
+tk.Button(manual_tab, text="Start Filling", command=start_filling_machine, font=button_font).pack(pady=5)
+tk.Button(manual_tab, text="Stop Filling", command=stop_filling_machine, font=button_font).pack(pady=5)
+tk.Button(manual_tab, text="Start Blowing", command=start_blowing_machine, font=button_font).pack(pady=5)
+tk.Button(manual_tab, text="Stop Blowing", command=stop_blowing_machine, font=button_font).pack(pady=5)
+tk.Button(manual_tab, text="Reset Counters", command=reset_gui_counters, font=button_font).pack(pady=5)
 
 # Automatic Control Tab
-for text, var in [("Stop Filling Machine for Sensor1 Traffic", stop_filling_for_traffic),
-                  ("Stop Labeling Machine for Sensor2 Traffic", stop_labeling_for_traffic),
-                  ("Stop Labeling Machine if Sensor1 Inactive", stop_labeling_for_timeout)]:
-    tk.Checkbutton(auto_tab, text=text, variable=var, font=label_font).pack(anchor="w", pady=2, padx=5)
-tk.Button(auto_tab, text="Enable Auto Mode", command=toggle_auto_mode, font=button_font).pack(pady=5)
+tk.Checkbutton(auto_tab, text="Stop Filling Machine for Sensor1 Traffic", variable=stop_filling_for_traffic).pack(pady=5)
+tk.Checkbutton(auto_tab, text="Stop Labeling Machine for Sensor2 Traffic", variable=stop_labeling_for_traffic).pack(pady=5)
+tk.Checkbutton(auto_tab, text="Stop Labeling Machine if Sensor1 Inactive", variable=stop_labeling_for_timeout).pack(pady=5)
+tk.Button(auto_tab, text="Enable Auto Mode", command=toggle_auto_mode, font=button_font).pack(pady=10)
 
 # Settings Tab
-for text, var, update_func in [("Labeling Machine Timeout (seconds):", labeling_timeout_value, update_labeling_timeout),
-                               ("Traffic Threshold (seconds):", traffic_threshold_value, update_traffic_threshold)]:
-    tk.Label(settings_tab, text=text, font=label_font).pack(anchor="w", pady=2, padx=5)
-    tk.Entry(settings_tab, textvariable=var).pack(pady=2, padx=5)
-    tk.Button(settings_tab, text="Update", command=update_func, font=label_font).pack(pady=2)
+tk.Label(settings_tab, text="Labeling Machine Timeout (seconds):", font=label_font).pack(pady=5)
+tk.Entry(settings_tab, textvariable=labeling_timeout_value, font=label_font).pack(pady=5)
+tk.Button(settings_tab, text="Update Timeout", command=update_labeling_timeout, font=button_font).pack(pady=5)
+tk.Label(settings_tab, text="Traffic Threshold (seconds):", font=label_font).pack(pady=5)
+tk.Entry(settings_tab, textvariable=traffic_threshold_value, font=label_font).pack(pady=5)
+tk.Button(settings_tab, text="Update Threshold", command=update_traffic_threshold, font=button_font).pack(pady=5)
 
-# Status labels layout
-sensor1_label = tk.Label(status_frame, text=f"Sensor1 Counter: {sensor1_counter}", font=label_font, bg=frame_bg)
-sensor2_label = tk.Label(status_frame, text=f"Sensor2 Counter: {sensor2_counter}", font=label_font, bg=frame_bg)
-sensor1_traffic_label = tk.Label(status_frame, text="Sensor1 Traffic: Clear", font=label_font, bg=frame_bg)
-sensor2_traffic_label = tk.Label(status_frame, text="Sensor2 Traffic: Clear", font=label_font, bg=frame_bg)
-labeling_status_label = tk.Label(status_frame, text="Labeling Working: Inactive", font=label_font, bg=frame_bg)
-labeling_alarm_label = tk.Label(status_frame, text="Labeling Alarm: Inactive", font=label_font, bg=frame_bg)
-filling_status_label = tk.Label(status_frame, text="Filling Working: Inactive", font=label_font, bg=frame_bg)
-filling_alarm_label = tk.Label(status_frame, text="Filling Alarm: Inactive", font=label_font, bg=frame_bg)
-blowing_status_label = tk.Label(status_frame, text="Blowing Working: Inactive", font=label_font, bg=frame_bg)
-blowing_alarm_label = tk.Label(status_frame, text="Blowing Alarm: Inactive", font=label_font, bg=frame_bg)
-labeling_idle_label = tk.Label(status_frame, text="Labeling Idle: Inactive", font=label_font, bg=frame_bg)
-filling_idle_label = tk.Label(status_frame, text="Filling Idle: Inactive", font=label_font, bg=frame_bg)
-
-# Packing all status labels in status frame
-for label in [sensor1_label, sensor2_label, sensor1_traffic_label, sensor2_traffic_label, 
-              labeling_status_label, labeling_alarm_label, filling_status_label, filling_alarm_label,
-              blowing_status_label, blowing_alarm_label, labeling_idle_label, filling_idle_label]:
-    label.pack(anchor="w", pady=1, padx=5)
-
-# Mode status label at the bottom
-mode_status_label = tk.Label(root, text="Manual Mode Enabled", font=("Arial", 14, "bold"), bg="#cfd8dc")
-mode_status_label.pack(fill="x", pady=10)
+# Mode status label at the bottom of the status panel
+mode_status_label = tk.Label(status_panel, text="Manual Mode Enabled", font=("Arial", 14, "bold"), bg=frame_bg)
+mode_status_label.grid(row=13, column=0, columnspan=2, pady=10)
 
 # Start GUI update loop
 update_gui()
