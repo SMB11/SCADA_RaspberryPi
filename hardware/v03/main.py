@@ -102,11 +102,7 @@ sensor1_traffic_label.pack(pady=5)
 sensor2_traffic_label = tk.Label(status_frame, text="Sensor2 Traffic: Clear", bg="white", font=("Arial", 10))
 sensor2_traffic_label.pack(pady=5)
 
-# Idle Status Labels
-labeling_idle_label = tk.Label(status_frame, text="Labeling Idle: Inactive", bg="white", font=("Arial", 10))
-labeling_idle_label.pack(pady=5)
-filling_idle_label = tk.Label(status_frame, text="Filling Idle: Inactive", bg="white", font=("Arial", 10))
-filling_idle_label.pack(pady=5)
+
 
 # Tab control setup
 tab_control = ttk.Notebook(root)
@@ -149,6 +145,10 @@ tk.Button(settings_tab, text="Update Threshold", command=lambda: set_traffic_thr
 # System Status Tab for machine statuses
 for machine, status in [("Blowing", blowing_working), ("Filling", filling_working), ("Labeling", labeling_working)]:
     tk.Label(status_tab, text=f"{machine} Working: {'Active' if status.is_pressed else 'Inactive'}", bg="white", font=("Arial", 10)).pack(pady=5)
+
+for machine, status in [ ("Filling", filling_idle), ("Labeling", labeling_idle)]:
+    tk.Label(status_tab, text=f"{machine} Idle: {'Active' if status.is_pressed else 'Inactive'}", bg="white", font=("Arial", 10)).pack(pady=5)    
+    
 for machine, status in [("Blowing Alarm", blowing_alarm), ("Filling Alarm", filling_alarm), ("Labeling Alarm", labeling_alarm)]:
     tk.Label(status_tab, text=f"{machine}: {'Active' if status.is_pressed else 'Inactive'}", bg="white", font=("Arial", 10)).pack(pady=5)
 
