@@ -25,7 +25,7 @@ status_colors = {"active": "green", "stopped": "red", "idle": "yellow"}
 
 # Canvas for bottling line visualization
 canvas = tk.Canvas(root, width=700, height=700, bg="lightgray")
-canvas.grid(row=0, column=0, rowspan=2, padx=5, pady=5)  # Reduced padding for compact layout
+canvas.grid(row=0, column=0, rowspan=2, padx=5, pady=5)
 
 # Layout based on your image
 blowing_rect = canvas.create_rectangle(50, 50, 200, 100, fill=status_colors["idle"], outline="black", width=2)
@@ -92,6 +92,14 @@ def safe_get_int(var, default):
         print(f"Invalid input. Reset to default: {default}")
         return default
 
+# Toggle auto mode
+def toggle_auto_mode():
+    global auto_mode_enabled
+    auto_mode_enabled = not auto_mode_enabled
+    set_auto_mode(auto_mode_enabled)
+    auto_mode_indicator.config(text="Auto Mode Enabled" if auto_mode_enabled else "Manual Mode Enabled")
+    print("Auto Mode Enabled" if auto_mode_enabled else "Manual Mode Enabled")  # Terminal feedback
+
 # Populate Status Frame with sensor and traffic status
 sensor1_label = tk.Label(status_frame, text=f"Sensor1 Counter: {sensor1_counter}", bg="white", font=("Arial", 10))
 sensor1_label.pack(pady=5)
@@ -101,8 +109,6 @@ sensor1_traffic_label = tk.Label(status_frame, text="Sensor1 Traffic: Clear", bg
 sensor1_traffic_label.pack(pady=5)
 sensor2_traffic_label = tk.Label(status_frame, text="Sensor2 Traffic: Clear", bg="white", font=("Arial", 10))
 sensor2_traffic_label.pack(pady=5)
-
-
 
 # Tab control setup
 tab_control = ttk.Notebook(root)
@@ -130,7 +136,11 @@ stop_labeling_for_timeout = tk.BooleanVar()
 tk.Checkbutton(auto_tab, text="Stop Filling for Sensor1 Traffic", variable=stop_filling_for_traffic).pack(anchor="w", padx=5, pady=2)
 tk.Checkbutton(auto_tab, text="Stop Labeling for Sensor2 Traffic", variable=stop_labeling_for_traffic).pack(anchor="w", padx=5, pady=2)
 tk.Checkbutton(auto_tab, text="Stop Labeling if Sensor1 Inactive", variable=stop_labeling_for_timeout).pack(anchor="w", padx=5, pady=2)
-tk.Button(auto_tab, text="Enable Auto Mode", command=lambda: set_auto_mode(True)).pack(padx=5, pady=5)
+tk.Button(auto_tab, text="Toggle Auto Mode", command=toggle_auto_mode).pack(padx=5, pady=5)
+
+# Auto Mode Indicator
+auto_mode_indicator = tk.Label(root, text="Manual Mode Enabled", font=("Arial", 12), bg="lightgrey")
+auto_mode_indicator.grid(row=0, column=1, padx=5, pady=5, sticky="s")
 
 # Settings Tab
 labeling_timeout_value = tk.IntVar(value=5)
@@ -146,7 +156,7 @@ tk.Button(settings_tab, text="Update Threshold", command=lambda: set_traffic_thr
 for machine, status in [("Blowing", blowing_working), ("Filling", filling_working), ("Labeling", labeling_working)]:
     tk.Label(status_tab, text=f"{machine} Working: {'Active' if status.is_pressed else 'Inactive'}", bg="white", font=("Arial", 10)).pack(pady=5)
 
-for machine, status in [ ("Filling", filling_idle), ("Labeling", labeling_idle)]:
+for machine, status in [("Filling", filling_idle), ("Labeling", labeling_idle)]:
     tk.Label(status_tab, text=f"{machine} Idle: {'Active' if status.is_pressed else 'Inactive'}", bg="white", font=("Arial", 10)).pack(pady=5)    
     
 for machine, status in [("Blowing Alarm", blowing_alarm), ("Filling Alarm", filling_alarm), ("Labeling Alarm", labeling_alarm)]:
