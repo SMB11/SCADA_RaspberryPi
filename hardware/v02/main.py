@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 import logging
 from control import start_labeling_machine, stop_labeling_machine, start_filling_machine, stop_filling_machine, start_blowing_machine, stop_blowing_machine
-from status import check_sensor, check_auto_mode, initialize_logging, reset_counters, set_auto_mode, sensor1, sensor2, set_labeling_timeout, set_traffic_threshold, labeling_working , labeling_alarm, filling_working,filling_alarm, blowing_working,blowing_alarm,labeling_idle, filling_idle
+from status import check_sensor, check_auto_mode, initialize_logging, reset_counters, set_auto_mode, sensor1, sensor2, set_labeling_timeout, set_traffic_threshold, labeling_working, labeling_alarm, filling_working, filling_alarm, blowing_working, blowing_alarm, labeling_idle, filling_idle
 
 # Initialize logging
 initialize_logging()
@@ -16,24 +16,24 @@ root.title("Bottling Line Control System")
 stop_filling_for_traffic = tk.BooleanVar()
 stop_labeling_for_traffic = tk.BooleanVar()
 stop_labeling_for_timeout = tk.BooleanVar()
-labeling_timeout_value = tk.IntVar(value=5)  # Default timeout in seconds
-traffic_threshold_value = tk.IntVar(value=2)  # Default traffic threshold in seconds
+labeling_timeout_value = tk.StringVar(value="5")  # Default timeout in seconds
+traffic_threshold_value = tk.StringVar(value="2")  # Default traffic threshold in seconds
 
-# Function to validate and retrieve integer values with a default fallback
-def safe_get_int(var, default):
+# Function to safely update integer values with validation
+def safe_update_int(var, update_func, default):
     try:
-        return int(var.get())
-    except (tk.TclError, ValueError):
-        var.set(default)  # Reset to default if the value is invalid
-        return default
+        value = int(var.get())
+        update_func(value)
+    except ValueError:
+        var.set(str(default))  # Reset to default if input is invalid
 
 # Function to update the labeling timeout from settings tab
 def update_labeling_timeout():
-    set_labeling_timeout(safe_get_int(labeling_timeout_value, 5))
+    safe_update_int(labeling_timeout_value, set_labeling_timeout, 5)
 
 # Function to update the traffic threshold from settings tab
 def update_traffic_threshold():
-    set_traffic_threshold(safe_get_int(traffic_threshold_value, 2))
+    safe_update_int(traffic_threshold_value, set_traffic_threshold, 2)
 
 # Initialize counters and traffic thresholds
 sensor1_counter = 0
@@ -45,11 +45,14 @@ auto_mode_enabled = False
 # Function to update GUI and call auto mode logic
 def update_gui():
     global sensor1_counter, sensor2_counter, sensor1_traffic, sensor2_traffic
+
+    # Validate and get traffic threshold safely
     traffic_threshold = safe_get_int(traffic_threshold_value, 2)
 
+    # Update sensor counters and traffic detection
     sensor1_counter, sensor1_traffic = check_sensor(sensor1, sensor1_counter, sensor1_traffic, traffic_threshold)
     sensor2_counter, sensor2_traffic = check_sensor(sensor2, sensor2_counter, sensor2_traffic, traffic_threshold)
-    
+
     check_auto_mode(auto_mode_enabled, stop_filling_for_traffic.get(), sensor1_traffic, stop_labeling_for_traffic.get(), sensor2_traffic, stop_labeling_for_timeout.get())
 
     # Update GUI Labels
@@ -59,7 +62,21 @@ def update_gui():
     sensor2_traffic_label.config(text=f"Sensor2 Traffic: {'Detected' if sensor2_traffic else 'Clear'}")
     mode_status_label.config(text="Auto Mode Enabled" if auto_mode_enabled else "Manual Mode Enabled")
 
+    # Update machine statuses
+    update_machine_status_labels()
+
     root.after(100, update_gui)
+
+# Function to update machine status labels based on GPIO input status
+def update_machine_status_labels():
+    labeling_status_label.config(text=f"Labeling Working: {'Active' if labeling_working.is_pressed else 'Inactive'}")
+    labeling_alarm_label.config(text=f"Labeling Alarm: {'Active' if labeling_alarm.is_pressed else 'Inactive'}")
+    filling_status_label.config(text=f"Filling Working: {'Active' if filling_working.is_pressed else 'Inactive'}")
+    filling_alarm_label.config(text=f"Filling Alarm: {'Active' if filling_alarm.is_pressed else 'Inactive'}")
+    blowing_status_label.config(text=f"Blowing Working: {'Active' if blowing_working.is_pressed else 'Inactive'}")
+    blowing_alarm_label.config(text=f"Blowing Alarm: {'Active' if blowing_alarm.is_pressed else 'Inactive'}")
+    labeling_idle_label.config(text=f"Labeling Idle: {'Idle' if labeling_idle.is_pressed else 'Inactive'}")
+    filling_idle_label.config(text=f"Filling Idle: {'Idle' if filling_idle.is_pressed else 'Inactive'}")
 
 # Function to toggle auto mode
 def toggle_auto_mode():
