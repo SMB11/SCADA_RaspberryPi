@@ -46,7 +46,7 @@ canvas.create_line(425, 300, 425, 350, arrow=tk.LAST, width=2)
 
 # Status frame for counters and traffic indicators
 status_frame = tk.Frame(root, bg="white", relief=tk.RAISED, borderwidth=1)
-status_frame.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
+status_frame.grid(row=1, column=0, columnspan=2, padx=5, pady=5, sticky="nsew")
 
 # Function to get color based on machine status
 def get_status_color(working, alarm):
@@ -102,6 +102,12 @@ sensor1_traffic_label.pack(pady=5)
 sensor2_traffic_label = tk.Label(status_frame, text="Sensor2 Traffic: Clear", bg="white", font=("Arial", 10))
 sensor2_traffic_label.pack(pady=5)
 
+# Idle Status Labels
+labeling_idle_label = tk.Label(status_frame, text="Labeling Idle: Inactive", bg="white", font=("Arial", 10))
+labeling_idle_label.pack(pady=5)
+filling_idle_label = tk.Label(status_frame, text="Filling Idle: Inactive", bg="white", font=("Arial", 10))
+filling_idle_label.pack(pady=5)
+
 # Tab control setup
 tab_control = ttk.Notebook(root)
 manual_tab = ttk.Frame(tab_control)
@@ -112,7 +118,7 @@ tab_control.add(manual_tab, text="Manual Control")
 tab_control.add(auto_tab, text="Automatic Control")
 tab_control.add(settings_tab, text="Settings")
 tab_control.add(status_tab, text="System Status")
-tab_control.grid(row=1, column=1, padx=5, pady=5, sticky="nsew")
+tab_control.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
 
 # Manual Control Tab
 for text, cmd in [("Start Labeling", start_labeling_machine), ("Stop Labeling", stop_labeling_machine),
@@ -140,12 +146,12 @@ tk.Label(settings_tab, text="Traffic Threshold (s):").pack(anchor="w", padx=5, p
 tk.Entry(settings_tab, textvariable=traffic_threshold_value).pack(fill="x", padx=5, pady=2)
 tk.Button(settings_tab, text="Update Threshold", command=lambda: set_traffic_threshold(traffic_threshold_value.get())).pack(pady=5)
 
-# System Status Tab for machine indicators
+# System Status Tab for machine statuses
 for machine, status in [("Blowing", blowing_working), ("Filling", filling_working), ("Labeling", labeling_working)]:
     tk.Label(status_tab, text=f"{machine} Working: {'Active' if status.is_pressed else 'Inactive'}", bg="white", font=("Arial", 10)).pack(pady=5)
 for machine, status in [("Blowing Alarm", blowing_alarm), ("Filling Alarm", filling_alarm), ("Labeling Alarm", labeling_alarm)]:
     tk.Label(status_tab, text=f"{machine}: {'Active' if status.is_pressed else 'Inactive'}", bg="white", font=("Arial", 10)).pack(pady=5)
 
-# Initiate the update loop
+# Start the main loop
 update_bottling_line()
 root.mainloop()
