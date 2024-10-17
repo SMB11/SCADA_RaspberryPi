@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 import logging
 from control import start_labeling_machine, stop_labeling_machine, start_filling_machine, stop_filling_machine, start_blowing_machine, stop_blowing_machine
-from status import check_sensor, check_auto_mode, initialize_logging, reset_counters, set_auto_mode, sensor1, sensor2, set_labeling_timeout, set_traffic_threshold, labeling_working , labeling_alarm, filling_working,filling_alarm, blowing_working,blowing_alarm,labeling_idle, filling_idle
+from status import check_sensor, check_auto_mode, initialize_logging, reset_counters, set_auto_mode, sensor1, sensor2, set_labeling_timeout, set_traffic_threshold, labeling_working , labeling_alarm, filling_working, filling_alarm, blowing_working, blowing_alarm, labeling_idle, filling_idle
 
 # Initialize logging
 initialize_logging()
@@ -20,20 +20,24 @@ labeling_timeout_value = tk.StringVar(value="5")  # Default timeout in seconds a
 traffic_threshold_value = tk.StringVar(value="2")  # Default traffic threshold in seconds as string
 
 # Function to validate and update integer settings safely
-def safe_update_setting(var, update_func, default):
+def safe_update_setting(var, update_func, default, name):
     try:
         value = int(var.get())
         update_func(value)
+        print(f"{name} updated to {value} seconds")  # Terminal feedback
+        logging.info(f"{name} updated to {value} seconds")  # Logging feedback
     except ValueError:
         var.set(str(default))  # Reset to default if the input is invalid
+        print(f"{name} reset to default ({default} seconds) due to invalid input")  # Terminal feedback
+        logging.info(f"{name} reset to default ({default} seconds) due to invalid input")  # Logging feedback
 
 # Function to update the labeling timeout from settings tab
 def update_labeling_timeout():
-    safe_update_setting(labeling_timeout_value, set_labeling_timeout, 5)
+    safe_update_setting(labeling_timeout_value, set_labeling_timeout, 5, "Labeling Timeout")
 
 # Function to update the traffic threshold from settings tab
 def update_traffic_threshold():
-    safe_update_setting(traffic_threshold_value, set_traffic_threshold, 2)
+    safe_update_setting(traffic_threshold_value, set_traffic_threshold, 2, "Traffic Threshold")
 
 # Initialize counters and traffic thresholds
 sensor1_counter = 0
