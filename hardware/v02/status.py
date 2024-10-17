@@ -71,42 +71,51 @@ def check_auto_mode(auto_mode_enabled, stop_filling_for_traffic, sensor1_traffic
     if auto_mode_enabled:
         current_time = time.time()
 
-        # Stop and restart filling machine based on Sensor1 traffic
+        # 1. Control the Filling Machine based on Sensor1 traffic
         if stop_filling_for_traffic:
-            if sensor1_traffic:
-                if not filling_stopped_due_to_traffic:
-                    logging.info("Auto mode: Stopping filling machine due to traffic near Sensor1")
-                    stop_filling_machine()
-                    filling_stopped_due_to_traffic = True
-            elif filling_stopped_due_to_traffic:
+            if sensor1_traffic and not filling_stopped_due_to_traffic:
+                logging.info("Auto mode: Stopping filling machine due to traffic near Sensor1")
+                stop_filling_machine()
+                filling_stopped_due_to_traffic = True
+            elif not sensor1_traffic and filling_stopped_due_to_traffic:
                 logging.info("Auto mode: Restarting filling machine as traffic near Sensor1 is cleared")
                 start_filling_machine()
                 filling_stopped_due_to_traffic = False
 
-        # Stop and restart labeling machine based on Sensor2 traffic
+        # 2. Control the Labeling Machine based on Sensor2 traffic
         if stop_labeling_for_traffic:
-            if sensor2_traffic:
-                if not labeling_stopped_due_to_traffic:
-                    logging.info("Auto mode: Stopping labeling machine due to traffic near Sensor2")
-                    stop_labeling_machine()
-                    labeling_stopped_due_to_traffic = True
-            elif labeling_stopped_due_to_traffic:
+            if sensor2_traffic and not labeling_stopped_due_to_traffic:
+                logging.info("Auto mode: Stopping labeling machine due to traffic near Sensor2")
+                stop_labeling_machine()
+                labeling_stopped_due_to_traffic = True
+            elif not sensor2_traffic and labeling_stopped_due_to_traffic:
                 logging.info("Auto mode: Restarting labeling machine as traffic near Sensor2 is cleared")
                 start_labeling_machine()
                 labeling_stopped_due_to_traffic = False
 
-        # Stop labeling if enabled and no bottles have passed sensor1 within the specified timeout
-        if stop_labeling_for_timeout:
+        # 3. Control the Labeling Machine based on Sensor1 inactivity timeout
+        if stop_labeling_for_timeout and not sensor1_traffic:  # Only apply if no traffic near Sensor1
             if labeling_working.is_pressed and (current_time - last_bottle_time) >= labeling_timeout:
                 if not labeling_stopped_due_to_timeout:
                     logging.info("Auto mode: Stopping labeling machine due to inactivity near Sensor1")
                     stop_labeling_machine()
                     labeling_stopped_due_to_timeout = True
             elif labeling_stopped_due_to_timeout and sensor1.is_pressed:
+                # Restart only if previously stopped due to timeout and traffic is clear
                 logging.info("Auto mode: Restarting labeling machine after inactivity near Sensor1 resolved")
                 start_labeling_machine()
                 labeling_stopped_due_to_timeout = False
 
+        # 4. Ensure Labeling Machine does not restart until all restart conditions are met
+        # If either traffic condition or timeout condition stopped the machine, don't restart until both are clear
+        if stop_labeling_for_traffic and stop_labeling_for_timeout:
+            if labeling_stopped_due_to_traffic or labeling_stopped_due_to_timeout:
+                if not sensor2_traffic and not (current_time - last_bottle_time) >= labeling_timeout:
+                    logging.info("Auto mode: Restarting labeling machine as both traffic and timeout conditions are resolved")
+                    start_labeling_machine()
+                    labeling_stopped_due_to_traffic = False
+                    labeling_stopped_due_to_timeout = False
+                    
 def set_auto_mode(enabled):
     logging.info(f"Auto mode {'enabled' if enabled else 'disabled'}")
 
