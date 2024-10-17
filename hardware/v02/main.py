@@ -19,13 +19,19 @@ stop_labeling_for_timeout = tk.BooleanVar()  # New variable for labeling timeout
 labeling_timeout_value = tk.IntVar(value=5)  # Default timeout in seconds
 traffic_threshold_value = tk.IntVar(value=2)  # Default traffic threshold in seconds
 
+# Define these global variables at the beginning of the file
+sensor1_high_start = None
+sensor2_high_start = None
+
 # Function to update the labeling timeout from settings tab
 def update_labeling_timeout():
     set_labeling_timeout(labeling_timeout_value.get())
 
-# Function to update the traffic threshold from settings tab
 def update_traffic_threshold():
-    set_traffic_threshold(traffic_threshold_value.get())
+    try:
+        set_traffic_threshold(traffic_threshold_value.get())
+    except ValueError:
+        logging.error("Invalid traffic threshold value.")
 
 # Initialize counters and traffic thresholds
 sensor1_counter = 0

@@ -29,22 +29,37 @@ def initialize_logging():
     logging.basicConfig(filename='machine_log.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
 
 def check_sensor(sensor, sensor_counter, traffic_flag, traffic_threshold):
-    high_start = None
+    # Track high start time outside the function for persistence
+    global sensor1_high_start, sensor2_high_start
+    
+    # Set sensor-specific high_start variable
+    high_start = sensor1_high_start if sensor.pin.number == 13 else sensor2_high_start
+
     if sensor.is_pressed:
-        global last_bottle_time
-        last_bottle_time = time.time()  # Update last detected bottle time
+        # If first detection of high, initialize high start time
         if high_start is None:
-            sensor_counter += 1
+            sensor_counter += 1  # Increment counter only when signal first goes high
             logging.info(f"{sensor.pin} detected - Counter: {sensor_counter}")
-            time.sleep(0.2)
-            high_start = time.time()
-        elif time.time() - high_start >= traffic_threshold:
-            traffic_flag = True
+            high_start = time.time()  # Record the time when traffic starts
+            time.sleep(0.2)  # Debounce delay
+
+        # Check if traffic has been sustained beyond threshold
+        elif time.time() - high_start >= traffic_threshold and not traffic_flag:
             logging.info(f"Traffic detected on {sensor.pin}")
+            traffic_flag = True  # Set traffic flag
     else:
+        # Reset traffic and high start when sensor is not pressed
         if traffic_flag:
             logging.info(f"Traffic cleared on {sensor.pin}")
         traffic_flag = False
+        high_start = None  # Reset high start
+
+    # Update the sensor-specific high start variable
+    if sensor.pin.number == 13:
+        sensor1_high_start = high_start
+    else:
+        sensor2_high_start = high_start
+
     return sensor_counter, traffic_flag
 
 def check_auto_mode(auto_mode_enabled, stop_filling_for_traffic, sensor1_traffic, stop_labeling_for_traffic, sensor2_traffic, stop_labeling_for_timeout):
