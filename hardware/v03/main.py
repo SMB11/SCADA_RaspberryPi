@@ -14,27 +14,27 @@ root.title("Bottling Line Control System")
 root.geometry("1100x600")
 
 # Canvas for bottling line visualization
-canvas = tk.Canvas(root, width=500, height=400, bg="white")
+canvas = tk.Canvas(root, width=700, height=600, bg="lightgray")
 canvas.grid(row=0, column=0, rowspan=2, padx=20, pady=20)
 
 # Define color mappings for machine status
 status_colors = {"active": "green", "stopped": "red", "idle": "yellow"}
 
-# Create bottling line elements on the Canvas
-blowing_rect = canvas.create_rectangle(30, 50, 110, 130, fill=status_colors["idle"], outline="black", width=2)
-canvas.create_text(70, 140, text="Blowing Machine")
-canvas.create_line(120, 90, 180, 90, arrow=tk.LAST, width=3)  # Conveyor
+# Create bottling line elements on the Canvas according to the structure in the image
+blowing_rect = canvas.create_rectangle(50, 50, 250, 130, fill=status_colors["idle"], outline="black", width=2)
+canvas.create_text(150, 140, text="Bottle Blowing Machine")
+canvas.create_line(250, 90, 350, 90, arrow=tk.LAST, width=3)  # Conveyor
 
-filling_rect = canvas.create_rectangle(190, 50, 270, 130, fill=status_colors["idle"], outline="black", width=2)
-canvas.create_text(230, 140, text="Filling Machine")
-canvas.create_line(280, 90, 340, 90, arrow=tk.LAST, width=3)  # Conveyor
+filling_rect = canvas.create_rectangle(350, 160, 550, 240, fill=status_colors["idle"], outline="black", width=2)
+canvas.create_text(450, 250, text="Bottle Filling Machine")
+canvas.create_line(300, 200, 350, 200, arrow=tk.LAST, width=3)  # Conveyor
 
-labeling_rect = canvas.create_rectangle(350, 50, 430, 130, fill=status_colors["idle"], outline="black", width=2)
-canvas.create_text(390, 140, text="Labeling Machine")
-canvas.create_line(440, 90, 500, 90, arrow=tk.LAST, width=3)  # Conveyor
+labeling_rect = canvas.create_rectangle(50, 270, 250, 350, fill=status_colors["idle"], outline="black", width=2)
+canvas.create_text(150, 360, text="Bottle Labeling Machine")
+canvas.create_line(250, 310, 350, 310, arrow=tk.LAST, width=3)  # Conveyor
 
-packing_rect = canvas.create_rectangle(510, 50, 590, 130, fill=status_colors["idle"], outline="black", width=2)
-canvas.create_text(550, 140, text="Packing Machine")
+packing_rect = canvas.create_rectangle(350, 380, 550, 460, fill=status_colors["idle"], outline="black", width=2)
+canvas.create_text(450, 470, text="Bottle Packing Machine")
 
 # Function to get color based on machine status
 def get_status_color(working, alarm):
@@ -51,6 +51,7 @@ def update_bottling_line():
     canvas.itemconfig(blowing_rect, fill=get_status_color(blowing_working.is_pressed, blowing_alarm.is_pressed))
     canvas.itemconfig(filling_rect, fill=get_status_color(filling_working.is_pressed, filling_alarm.is_pressed))
     canvas.itemconfig(labeling_rect, fill=get_status_color(labeling_working.is_pressed, labeling_alarm.is_pressed))
+    canvas.itemconfig(packing_rect, fill=status_colors["idle"])  # Assuming packing is always idle
 
     # Schedule next update
     root.after(1000, update_bottling_line)
@@ -93,7 +94,7 @@ tk.Label(settings_tab, text="Traffic Threshold (s):").pack()
 tk.Entry(settings_tab, textvariable=traffic_threshold_value).pack()
 tk.Button(settings_tab, text="Update Threshold", command=lambda: set_traffic_threshold(traffic_threshold_value.get())).pack()
 
-# Common Labels and Status Frames
+# Common Status Frame
 status_frame = tk.Frame(root, bg="white", padx=10, pady=10)
 status_frame.grid(row=1, column=1, sticky="nsew")
 sensor1_label = tk.Label(status_frame, text="Sensor1 Counter: 0", bg="white")
