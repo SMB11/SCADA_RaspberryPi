@@ -81,6 +81,18 @@ def update_bottling_line():
     sensor1_traffic_label.config(text=f"Sensor1 Traffic: {'Detected' if sensor1_traffic else 'Clear'}")
     sensor2_traffic_label.config(text=f"Sensor2 Traffic: {'Detected' if sensor2_traffic else 'Clear'}")
 
+    # Update machine statuses in system status tab
+    blowing_status_label.config(text=f"Blowing Working: {'Active' if blowing_working.is_pressed else 'Inactive'}")
+    filling_status_label.config(text=f"Filling Working: {'Active' if filling_working.is_pressed else 'Inactive'}")
+    labeling_status_label.config(text=f"Labeling Working: {'Active' if labeling_working.is_pressed else 'Inactive'}")
+
+    blowing_alarm_label.config(text=f"Blowing Alarm: {'Active' if blowing_alarm.is_pressed else 'Inactive'}")
+    filling_alarm_label.config(text=f"Filling Alarm: {'Active' if filling_alarm.is_pressed else 'Inactive'}")
+    labeling_alarm_label.config(text=f"Labeling Alarm: {'Active' if labeling_alarm.is_pressed else 'Inactive'}")
+
+    labeling_idle_label.config(text=f"Labeling Idle: {'Idle' if labeling_idle.is_pressed else 'Inactive'}")
+    filling_idle_label.config(text=f"Filling Idle: {'Idle' if filling_idle.is_pressed else 'Inactive'}")
+
     root.after(100, update_bottling_line)
 
 # Validation function for integer values with feedback
@@ -153,14 +165,24 @@ tk.Entry(settings_tab, textvariable=traffic_threshold_value).pack(fill="x", padx
 tk.Button(settings_tab, text="Update Threshold", command=lambda: set_traffic_threshold(traffic_threshold_value.get())).pack(pady=5)
 
 # System Status Tab for machine statuses
-for machine, status in [("Blowing", blowing_working), ("Filling", filling_working), ("Labeling", labeling_working)]:
-    tk.Label(status_tab, text=f"{machine} Working: {'Active' if status.is_pressed else 'Inactive'}", bg="white", font=("Arial", 10)).pack(pady=5)
+blowing_status_label = tk.Label(status_tab, text="Blowing Working: Inactive", bg="white", font=("Arial", 10))
+blowing_status_label.pack(pady=5)
+filling_status_label = tk.Label(status_tab, text="Filling Working: Inactive", bg="white", font=("Arial", 10))
+filling_status_label.pack(pady=5)
+labeling_status_label = tk.Label(status_tab, text="Labeling Working: Inactive", bg="white", font=("Arial", 10))
+labeling_status_label.pack(pady=5)
 
-for machine, status in [("Filling", filling_idle), ("Labeling", labeling_idle)]:
-    tk.Label(status_tab, text=f"{machine} Idle: {'Active' if status.is_pressed else 'Inactive'}", bg="white", font=("Arial", 10)).pack(pady=5)    
-    
-for machine, status in [("Blowing Alarm", blowing_alarm), ("Filling Alarm", filling_alarm), ("Labeling Alarm", labeling_alarm)]:
-    tk.Label(status_tab, text=f"{machine}: {'Active' if status.is_pressed else 'Inactive'}", bg="white", font=("Arial", 10)).pack(pady=5)
+blowing_alarm_label = tk.Label(status_tab, text="Blowing Alarm: Inactive", bg="white", font=("Arial", 10))
+blowing_alarm_label.pack(pady=5)
+filling_alarm_label = tk.Label(status_tab, text="Filling Alarm: Inactive", bg="white", font=("Arial", 10))
+filling_alarm_label.pack(pady=5)
+labeling_alarm_label = tk.Label(status_tab, text="Labeling Alarm: Inactive", bg="white", font=("Arial", 10))
+labeling_alarm_label.pack(pady=5)
+
+labeling_idle_label = tk.Label(status_tab, text="Labeling Idle: Inactive", bg="white", font=("Arial", 10))
+labeling_idle_label.pack(pady=5)
+filling_idle_label = tk.Label(status_tab, text="Filling Idle: Inactive", bg="white", font=("Arial", 10))
+filling_idle_label.pack(pady=5)
 
 # Start the main loop
 update_bottling_line()
