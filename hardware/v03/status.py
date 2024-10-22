@@ -104,15 +104,17 @@ def check_auto_mode(auto_mode_enabled, stop_filling_for_traffic, sensor1_traffic
                     stop_labeling_machine()
                     labeling_stopped_due_to_timeout = True
             elif labeling_stopped_due_to_timeout and sensor1.is_pressed:
-                # Restart only if previously stopped due to timeout and traffic is clear
+                # Restart if the machine was stopped due to timeout and traffic is clear
                 logging.info("Auto mode: Restarting labeling machine after inactivity near Sensor1 resolved")
                 start_labeling_machine()
                 labeling_stopped_due_to_timeout = False
 
-        # 4. Ensure Labeling Machine does not restart until both traffic and timeout conditions are resolved
+        # 4. Restart the labeling machine when both traffic and timeout conditions are resolved
+        # Ensure labeling machine restarts only if both timeout and traffic have been cleared
         if stop_labeling_for_traffic and stop_labeling_for_timeout:
             if labeling_stopped_due_to_traffic or labeling_stopped_due_to_timeout:
-                if not sensor2_traffic and (current_time - last_bottle_time) < labeling_timeout:
+                # Restart only if Sensor2 traffic is clear and timeout conditions are no longer active
+                if not sensor2_traffic and sensor1.is_pressed:
                     logging.info("Auto mode: Restarting labeling machine as both traffic and timeout conditions are resolved")
                     start_labeling_machine()
                     labeling_stopped_due_to_traffic = False
