@@ -156,7 +156,7 @@ auto_mode_indicator.grid(row=0, column=1, padx=5, pady=5, sticky="s")
 
 # Settings Tab
 labeling_timeout_value = tk.IntVar(value=5)
-traffic_threshold_value = tk.IntVar(value=2)
+traffic_threshold_value = tk.IntVar(value=3)
 tk.Label(settings_tab, text="Labeling Timeout (s):").pack(anchor="w", padx=5, pady=2)
 tk.Entry(settings_tab, textvariable=labeling_timeout_value).pack(fill="x", padx=5, pady=2)
 tk.Button(settings_tab, text="Update Timeout", command=lambda: set_labeling_timeout(labeling_timeout_value.get())).pack(pady=5)
