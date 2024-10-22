@@ -33,13 +33,16 @@ def initialize_logging():
     logging.basicConfig(filename='machine_log.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
 
 def check_sensor(sensor, sensor_counter, traffic_flag, traffic_threshold):
-    # Track high start time outside the function for persistence
-    global sensor1_high_start, sensor2_high_start
+    global sensor1_high_start, sensor2_high_start, last_bottle_time
     
     # Set sensor-specific high_start variable
     high_start = sensor1_high_start if sensor.pin.number == 13 else sensor2_high_start
 
     if sensor.is_pressed:
+        # Update the last_bottle_time if Sensor1 is pressed
+        if sensor.pin.number == 13:
+            last_bottle_time = time.time()  # Update time when bottle passes Sensor1
+
         # If first detection of high, initialize high start time
         if high_start is None:
             sensor_counter += 1  # Increment counter only when signal first goes high
