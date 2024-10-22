@@ -68,9 +68,9 @@ def check_sensor(sensor, sensor_counter, traffic_flag, traffic_threshold):
 
 def check_auto_mode(auto_mode_enabled, stop_filling_for_traffic, sensor1_traffic, stop_labeling_for_traffic, sensor2_traffic, stop_labeling_for_timeout):
     global last_bottle_time, labeling_stopped_due_to_timeout, filling_stopped_due_to_traffic, labeling_stopped_due_to_traffic
-    if auto_mode_enabled:
-        current_time = time.time()
+    current_time = time.time()
 
+    if auto_mode_enabled:
         # 1. Control the Filling Machine based on Sensor1 traffic
         if stop_filling_for_traffic:
             if sensor1_traffic and not filling_stopped_due_to_traffic:
@@ -106,11 +106,10 @@ def check_auto_mode(auto_mode_enabled, stop_filling_for_traffic, sensor1_traffic
                 start_labeling_machine()
                 labeling_stopped_due_to_timeout = False
 
-        # 4. Ensure Labeling Machine does not restart until all restart conditions are met
-        # If either traffic condition or timeout condition stopped the machine, don't restart until both are clear
+        # 4. Ensure Labeling Machine does not restart until both traffic and timeout conditions are resolved
         if stop_labeling_for_traffic and stop_labeling_for_timeout:
             if labeling_stopped_due_to_traffic or labeling_stopped_due_to_timeout:
-                if not sensor2_traffic and not (current_time - last_bottle_time) >= labeling_timeout:
+                if not sensor2_traffic and (current_time - last_bottle_time) < labeling_timeout:
                     logging.info("Auto mode: Restarting labeling machine as both traffic and timeout conditions are resolved")
                     start_labeling_machine()
                     labeling_stopped_due_to_traffic = False
