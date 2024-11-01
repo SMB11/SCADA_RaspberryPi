@@ -11,7 +11,7 @@ labeling_alarm = Button(19, pull_up=True)
 filling_working = Button(16, pull_up=True)
 filling_alarm = Button(21, pull_up=True)
 blowing_working = Button(18, pull_up=True)
-blowing_alarm = Button(10, pull_up=True)
+blowing_alarm = Button(17, pull_up=True)
 labeling_idle = Button(12, pull_up=True)
 filling_idle = Button(5, pull_up=True)
 
