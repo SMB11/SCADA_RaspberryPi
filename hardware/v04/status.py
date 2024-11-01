@@ -33,14 +33,16 @@ labeling_stopped_due_to_traffic = False
 def initialize_logging():
     logging.basicConfig(filename='machine_log.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
 
-def check_sensor(sensor, sensor_counter, traffic_flag, traffic_threshold, sensor_number):
+def check_sensor(sensor, sensor_counter, traffic_flag, sensor_number):
     global sensor1_high_start, sensor2_high_start, last_bottle_time
 
-    # Set sensor-specific high_start variable
+    # Set sensor-specific high_start variable and threshold
     if sensor_number == 1:
         high_start = sensor1_high_start
+        traffic_threshold = traffic_threshold_sensor1
     else:
         high_start = sensor2_high_start
+        traffic_threshold = traffic_threshold_sensor2
 
     if sensor.is_pressed:
         # Update the last_bottle_time if Sensor1 is pressed

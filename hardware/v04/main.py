@@ -60,12 +60,10 @@ def get_status_color(working, alarm):
 # Function to update sensor counts, traffic status, and visual indicators
 def update_bottling_line():
     global sensor1_counter, sensor2_counter, sensor1_traffic, sensor2_traffic
-    traffic_threshold_sensor1 = safe_get_int(traffic_threshold_value_sensor1, 2)
-    traffic_threshold_sensor2 = safe_get_int(traffic_threshold_value_sensor2, 2)
 
     # Update sensors and check for traffic
-    sensor1_counter, sensor1_traffic = check_sensor(sensor1, sensor1_counter, sensor1_traffic, traffic_threshold_sensor1, sensor_number=1)
-    sensor2_counter, sensor2_traffic = check_sensor(sensor2, sensor2_counter, sensor2_traffic, traffic_threshold_sensor2, sensor_number=2)
+    sensor1_counter, sensor1_traffic = check_sensor(sensor1, sensor1_counter, sensor1_traffic, sensor_number=1)
+    sensor2_counter, sensor2_traffic = check_sensor(sensor2, sensor2_counter, sensor2_traffic, sensor_number=2)
 
     # Check auto mode
     check_auto_mode(auto_mode_enabled, stop_filling_for_traffic.get(), sensor1_traffic, stop_labeling_for_traffic.get(), sensor2_traffic, stop_labeling_for_timeout.get())
@@ -95,15 +93,6 @@ def update_bottling_line():
     filling_idle_label.config(text=f"Filling Idle: {'Idle' if filling_idle.is_pressed else 'Inactive'}")
 
     root.after(100, update_bottling_line)
-
-# Validation function for integer values with feedback
-def safe_get_int(var, default):
-    try:
-        return int(var.get())
-    except (tk.TclError, ValueError):
-        var.set(default)
-        print(f"Invalid input. Reset to default: {default}")
-        return default
 
 # Toggle auto mode
 def toggle_auto_mode():
@@ -157,17 +146,39 @@ auto_mode_indicator.grid(row=0, column=1, padx=5, pady=5, sticky="s")
 
 # Settings Tab
 labeling_timeout_value = tk.IntVar(value=5)
-traffic_threshold_value_sensor1 = tk.IntVar(value=2)
-traffic_threshold_value_sensor2 = tk.IntVar(value=2)
+traffic_threshold_value_sensor1 = tk.StringVar(value='2')
+traffic_threshold_value_sensor2 = tk.StringVar(value='2')
+
+def update_labeling_timeout():
+    value = labeling_timeout_value.get()
+    set_labeling_timeout(value)
+    print(f"Labeling timeout updated to {value} seconds")
+
+def update_traffic_threshold_sensor1():
+    try:
+        value = int(traffic_threshold_value_sensor1.get())
+        set_traffic_threshold_sensor1(value)
+        print(f"Traffic threshold for Sensor1 updated to {value} seconds")
+    except ValueError:
+        print("Invalid input for Sensor1 traffic threshold")
+
+def update_traffic_threshold_sensor2():
+    try:
+        value = int(traffic_threshold_value_sensor2.get())
+        set_traffic_threshold_sensor2(value)
+        print(f"Traffic threshold for Sensor2 updated to {value} seconds")
+    except ValueError:
+        print("Invalid input for Sensor2 traffic threshold")
+
 tk.Label(settings_tab, text="Labeling Timeout (s):").pack(anchor="w", padx=5, pady=2)
 tk.Entry(settings_tab, textvariable=labeling_timeout_value).pack(fill="x", padx=5, pady=2)
-tk.Button(settings_tab, text="Update Timeout", command=lambda: set_labeling_timeout(labeling_timeout_value.get())).pack(pady=5)
+tk.Button(settings_tab, text="Update Timeout", command=update_labeling_timeout).pack(pady=5)
 tk.Label(settings_tab, text="Traffic Threshold Sensor1 (s):").pack(anchor="w", padx=5, pady=2)
 tk.Entry(settings_tab, textvariable=traffic_threshold_value_sensor1).pack(fill="x", padx=5, pady=2)
-tk.Button(settings_tab, text="Update Threshold Sensor1", command=lambda: set_traffic_threshold_sensor1(traffic_threshold_value_sensor1.get())).pack(pady=5)
+tk.Button(settings_tab, text="Update Threshold Sensor1", command=update_traffic_threshold_sensor1).pack(pady=5)
 tk.Label(settings_tab, text="Traffic Threshold Sensor2 (s):").pack(anchor="w", padx=5, pady=2)
 tk.Entry(settings_tab, textvariable=traffic_threshold_value_sensor2).pack(fill="x", padx=5, pady=2)
-tk.Button(settings_tab, text="Update Threshold Sensor2", command=lambda: set_traffic_threshold_sensor2(traffic_threshold_value_sensor2.get())).pack(pady=5)
+tk.Button(settings_tab, text="Update Threshold Sensor2", command=update_traffic_threshold_sensor2).pack(pady=5)
 
 # System Status Tab for machine statuses
 blowing_status_label = tk.Label(status_tab, text="Blowing Working: Inactive", bg="white", font=("Arial", 10))
